@@ -1,3 +1,31 @@
+*.swp
+*.vscode
+*.ipynb_checkpoints
+*__pycache__
+
+# dont commit images or videos
+*.jpg
+*.png
+*.mov
+*.mp4
+*.mp3
+*.aac
+*.avi
+!sample*.jpg
+!sample*.png
+!sample*.mov
+!sample*.mp4
+
+# never commit config (as it contains secrets)
+.env
+.env.docker
+
+# do not commit venv folder
+pyenv
+
+# ignore .tmp folder
+.tmp
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

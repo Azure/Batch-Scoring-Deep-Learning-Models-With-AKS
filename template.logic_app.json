@@ -1,0 +1,242 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "connections_aci_name": {
+            "defaultValue": "aci",
+            "type": "String"
+        },
+        "connections_azureblob_name": {
+            "defaultValue": "azureblob",
+            "type": "String"
+        },
+        "workflows_{{ env['LOGIC_APP'] }}_name": {
+            "defaultValue": "{{ env['LOGIC_APP'] }}",
+            "type": "String"
+        },
+        "workflows_{{ env['RESOURCE_GROUP'] }}_path": {
+            "defaultValue": "/subscriptions/@{encodeURIComponent('{{ env['SUBSCRIPTION_ID'] }}')}/resourceGroups/@{encodeURIComponent('{{ env['RESOURCE_GROUP'] }}')}/providers/Microsoft.ContainerInstance/containerGroups/@{encodeURIComponent('{{ env['ACI_CONTAINER_GROUP'] }}')}",
+            "type": "String"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "comments": "Generalized from resource: '/subscriptions/{{ env['SUBSCRIPTION_ID'] }}/resourceGroups/{{ env['RESOURCE_GROUP'] }}/providers/Microsoft.Logic/workflows/{{ env['LOGIC_APP'] }}'.",
+            "type": "Microsoft.Logic/workflows",
+            "name": "[parameters('workflows_{{ env['LOGIC_APP'] }}_name')]",
+            "apiVersion": "2017-07-01",
+            "location": "{{ env['REGION'] }}",
+            "tags": {},
+            "scale": null,
+            "properties": {
+                "state": "Enabled",
+                "definition": {
+                    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "$connections": {
+                            "defaultValue": {},
+                            "type": "Object"
+                        }
+                    },
+                    "triggers": {
+                        "When_a_blob_is_added_or_modified_(properties_only)": {
+                            "recurrence": {
+                                "frequency": "Minute",
+                                "interval": 1
+                            },
+                            "splitOn": "@triggerBody()",
+                            "metadata": {
+                                "JTJmYWtz": "/{{ env['STORAGE_CONTAINER_NAME'] }}"
+                            },
+                            "type": "ApiConnection",
+                            "inputs": {
+                                "host": {
+                                    "connection": {
+                                        "name": "@parameters('$connections')['azureblob']['connectionId']"
+                                    }
+                                },
+                                "method": "get",
+                                "path": "/datasets/default/triggers/batch/onupdatedfile",
+                                "queries": {
+                                    "folderId": "JTJmYWtz",
+                                    "maxFileCount": 10
+                                }
+                            }
+                        }
+                    },
+                    "actions": {
+                        "Condition": {
+                            "actions": {
+                                "Create_container_group": {
+                                    "runAfter": {
+                                        "Get_blob_content": [
+                                            "Succeeded"
+                                        ]
+                                    },
+                                    "type": "ApiConnection",
+                                    "inputs": {
+                                        "body": {
+                                            "location": "eastus",
+                                            "properties": {
+                                                "containers": [
+                                                    {
+                                                        "name": "@{concat('job-', toLower(replace(replace(utcNow(), ':', '-'), '.', '-')))}",
+                                                        "properties": {
+                                                            "environmentVariables": [
+                                                                {
+                                                                    "name": "STORAGE_CONTAINER_NAME",
+                                                                    "value": "{{ env['STORAGE_CONTAINER_NAME'] }}"
+                                                                },
+                                                                {
+                                                                    "name": "STORAGE_ACCOUNT_NAME",
+                                                                    "value": "{{ env['STORAGE_ACCOUNT_NAME'] }}"
+                                                                },
+                                                                {
+                                                                    "name": "STORAGE_ACCOUNT_KEY",
+                                                                    "value": "{{ env['STORAGE_ACCOUNT_KEY'] }}"
+                                                                },
+                                                                {
+                                                                    "name": "STORAGE_INPUT_DIR",
+                                                                    "value": "{{ env['STORAGE_INPUT_DIR'] }}"
+                                                                },
+                                                                {
+                                                                    "name": "SB_NAMESPACE",
+                                                                    "value": "{{ env['SB_NAMESPACE'] }}"
+                                                                },
+                                                                {
+                                                                    "name": "SB_QUEUE",
+                                                                    "value": "{{ env['SB_QUEUE'] }}"
+                                                                },
+                                                                {
+                                                                    "name": "SB_SHARED_ACCESS_KEY_NAME",
+                                                                    "value": "{{ env['SB_SHARED_ACCESS_KEY_NAME'] }}"
+                                                                },
+                                                                {
+                                                                    "name": "SB_SHARED_ACCESS_KEY_VALUE",
+                                                                    "value": "{{ env['SB_SHARED_ACCESS_KEY_VALUE'] }}"
+                                                                }
+                                                            ],
+                                                            "image": "{{ env['DOCKER_LOGIN'] }}/{{ env['QUEUER_IMAGE_REPO'] }}",
+                                                            "resources": {
+                                                                "requests": {
+                                                                    "cpu": 2,
+                                                                    "memoryInGB": 3.5
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                ],
+                                                "osType": "Linux",
+                                                "restartPolicy": "OnFailure"
+                                            }
+                                        },
+                                        "host": {
+                                            "connection": {
+                                                "name": "@parameters('$connections')['aci']['connectionId']"
+                                            }
+                                        },
+                                        "method": "put",
+                                        "path": "[parameters('workflows_{{ env['RESOURCE_GROUP'] }}_path')]",
+                                        "queries": {
+                                            "x-ms-api-version": "2017-10-01-preview"
+                                        }
+                                    }
+                                },
+                                "Get_blob_content": {
+                                    "runAfter": {},
+                                    "type": "ApiConnection",
+                                    "inputs": {
+                                        "host": {
+                                            "connection": {
+                                                "name": "@parameters('$connections')['azureblob']['connectionId']"
+                                            }
+                                        },
+                                        "method": "get",
+                                        "path": "/datasets/default/files/@{encodeURIComponent(encodeURIComponent(triggerBody()?['Path']))}/content",
+                                        "queries": {
+                                            "inferContentType": true
+                                        }
+                                    }
+                                }
+                            },
+                            "runAfter": {},
+                            "expression": {
+                                "and": [
+                                    {
+                                        "startsWith": [
+                                            "@triggerBody()?['Name']",
+                                            "trigger"
+                                        ]
+                                    },
+                                    {
+                                        "endsWith": [
+                                            "@triggerBody()?['Name']",
+                                            ".txt"
+                                        ]
+                                    }
+                                ]
+                            },
+                            "type": "If"
+                        }
+                    },
+                    "outputs": {}
+                },
+                "parameters": {
+                    "$connections": {
+                        "value": {
+                            "aci": {
+                                "connectionId": "[resourceId('Microsoft.Web/connections', parameters('connections_aci_name'))]",
+                                "connectionName": "aci",
+                                "id": "/subscriptions/{{ env['SUBSCRIPTION_ID'] }}/providers/Microsoft.Web/locations/{{ env['REGION'] }}/managedApis/aci"
+                            },
+                            "azureblob": {
+                                "connectionId": "[resourceId('Microsoft.Web/connections', parameters('connections_azureblob_name'))]",
+                                "connectionName": "azureblob",
+                                "id": "/subscriptions/{{ env['SUBSCRIPTION_ID'] }}/providers/Microsoft.Web/locations/{{ env['REGION'] }}/managedApis/azureblob"
+                            }
+                        }
+                    }
+                }
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/connections', parameters('connections_aci_name'))]",
+                "[resourceId('Microsoft.Web/connections', parameters('connections_azureblob_name'))]"
+            ]
+        },
+        {
+            "comments": "Generalized from resource: '/subscriptions/{{ env['SUBSCRIPTION_ID'] }}/resourceGroups/{{ env['RESOURCE_GROUP'] }}/providers/Microsoft.Web/connections/aci'.",
+            "type": "Microsoft.Web/connections",
+            "name": "[parameters('connections_aci_name')]",
+            "apiVersion": "2016-06-01",
+            "location": "{{ env['REGION'] }}",
+            "scale": null,
+            "properties": {
+                "displayName": "{{ env['ACI_DISPLAY_NAME'] }}",
+                "customParameterValues": {},
+                "api": {
+                    "id": "[concat('/subscriptions/{{ env['SUBSCRIPTION_ID'] }}/providers/Microsoft.Web/locations/{{ env['REGION'] }}/managedApis/', parameters('connections_aci_name'))]"
+                }
+            },
+            "dependsOn": []
+        },
+        {
+            "comments": "Generalized from resource: '/subscriptions/{{ env['SUBSCRIPTION_ID'] }}/resourceGroups/{{ env['RESOURCE_GROUP'] }}/providers/Microsoft.Web/connections/azureblob'.",
+            "type": "Microsoft.Web/connections",
+            "name": "[parameters('connections_azureblob_name')]",
+            "apiVersion": "2016-06-01",
+            "location": "{{ env['REGION'] }}",
+            "scale": null,
+            "properties": {
+                "displayName": "DefaultEndpointsProtocol=https;AccountName={{ env['STORAGE_ACCOUNT_NAME'] }};AccountKey={{ env['STORAGE_ACCOUNT_KEY'] }};EndpointSuffix=core.windows.net",
+                "customParameterValues": {},
+                "api": {
+                    "id": "[concat('/subscriptions/{{ env['SUBSCRIPTION_ID'] }}/providers/Microsoft.Web/locations/{{ env['REGION'] }}/managedApis/', parameters('connections_azureblob_name'))]"
+                }
+            },
+            "dependsOn": []
+        }
+    ]
+}
+
