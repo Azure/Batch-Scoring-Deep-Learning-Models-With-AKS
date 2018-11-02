@@ -1,7 +1,9 @@
 from azure.servicebus import ServiceBusService, Message, Queue
 from azure.storage.blob import BlockBlobService
-import os
+from preprocess_video import process_video
+from add_images_to_queue import add_images_to_queue
 import argparse
+import os
 
 
 def create_service_bus_client(namespace, key_name, key_value):
@@ -21,23 +23,29 @@ def create_storage_client(account_name, account_key):
 
 if __name__ == "__main__":
     """
-    This script will take the names of all images inside of a directory in a 
-    container in Azure storage and add the name of the images as messages to 
-    the Service Bus queue.
+    This module will perform 2 steps:
+      1. split video into frames directory and audio file
+      2. add frames into service bus queue
     """
 
     parser = argparse.ArgumentParser(
         description="Add messages to queue based on images in blob storage."
     )
     parser.add_argument(
-        "--storage-container",
-        dest="storage_container",
+        "--video",
+        dest="video",
+        help="the name of the video in a storage container",
+        default="{}.mp4".format(os.getenv("VIDEO"))
+    )
+    parser.add_argument(
+        "--storage-container-name",
+        dest="storage_container_name",
         help="The name storage container.",
         default=os.getenv("STORAGE_CONTAINER_NAME")
     )
     parser.add_argument(
-        "--input-dir",
-        dest="input_dir",
+        "--frames-dir",
+        dest="frames_dir",
         help="The name of the image directory in your Azure storage container",
         default="input",
     )
@@ -85,43 +93,37 @@ if __name__ == "__main__":
         default=None,
     )
     args = parser.parse_args()
-    storage_container = args.storage_container
-    input_dir = args.input_dir
-    storage_account_name = args.storage_account_name
-    storage_account_key = args.storage_account_key
-    namespace = args.namespace
-    queue = args.queue
-    sb_key_name = args.sb_key_name
-    sb_key_value = args.sb_key_value
-    queue_limit = args.queue_limit
 
-    # service bus creds
-    bus_service = create_service_bus_client(namespace, sb_key_name, sb_key_value)
 
-    # blob creds
-    block_blob_service = create_storage_client(storage_account_name, storage_account_key)
-
-    # list all images in specified blob under directory $input_dir
-    blob_iterator = block_blob_service.list_blobs(
-        storage_container,
-        prefix=input_dir
+    # blob client
+    block_blob_service = create_storage_client(
+        args.storage_account_name, 
+        args.storage_account_key
     )
 
-    # for all images found, add to queue
-    print(
-        "Adding {} images in the directory '{}' of the storage container '{}' to the queue '{}'.".format(
-            queue_limit if queue_limit is not None else "all",
-            input_dir, 
-            storage_container,
-            queue
-        )
+    # process video and upload output frames and audio file to blob
+    frames_dir, audio = process_video(
+        args.video,
+        args.storage_container_name,
+        block_blob_service
     )
-    for i, blob in enumerate(blob_iterator):
-        
-        if queue_limit is not None and i >= queue_limit:
-            print("Queue limit is reached. Exiting process...")
-            exit(0)
-            
-        print("adding {} to queue...".format(blob.name.split("/")[-1]))
-        msg = Message(blob.name.encode())
-        bus_service.send_queue_message(queue, msg)
+
+    # service bus client
+    bus_service = create_service_bus_client(
+        args.namespace, 
+        args.sb_key_name, 
+        args.sb_key_value
+    )
+
+    # add all images from frame_dir to the queue
+    add_images_to_queue(
+        frames_dir,
+        args.storage_container_name,
+        args.queue,
+        args.queue_limit,
+        block_blob_service,
+        bus_service
+    )
+
+
+
