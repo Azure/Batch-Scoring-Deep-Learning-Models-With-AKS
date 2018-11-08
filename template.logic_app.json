@@ -14,7 +14,7 @@
             "defaultValue": "{{ env['LOGIC_APP'] }}",
             "type": "String"
         },
-        "workflows_{{ env['RESOURCE_GROUP'] }}_path": {
+        "workflows_{{ env['LOGIC_APP'] }}_path": {
             "defaultValue": "/subscriptions/@{encodeURIComponent('{{ env['SUBSCRIPTION_ID'] }}')}/resourceGroups/@{encodeURIComponent('{{ env['RESOURCE_GROUP'] }}')}/providers/Microsoft.ContainerInstance/containerGroups/@{encodeURIComponent('{{ env['ACI_CONTAINER_GROUP'] }}')}",
             "type": "String"
         }
@@ -48,7 +48,7 @@
                             },
                             "splitOn": "@triggerBody()",
                             "metadata": {
-                                "JTJmYWtz": "/{{ env['STORAGE_CONTAINER_NAME'] }}"
+                                "JTJmYWtz": "/aks"
                             },
                             "type": "ApiConnection",
                             "inputs": {
@@ -70,15 +70,11 @@
                         "Condition": {
                             "actions": {
                                 "Create_container_group": {
-                                    "runAfter": {
-                                        "Get_blob_content": [
-                                            "Succeeded"
-                                        ]
-                                    },
+                                    "runAfter": {},
                                     "type": "ApiConnection",
                                     "inputs": {
                                         "body": {
-                                            "location": "eastus",
+                                            "location": "{{ env['REGION'] }}",
                                             "properties": {
                                                 "containers": [
                                                     {
@@ -98,10 +94,6 @@
                                                                     "value": "{{ env['STORAGE_ACCOUNT_KEY'] }}"
                                                                 },
                                                                 {
-                                                                    "name": "STORAGE_INPUT_DIR",
-                                                                    "value": "{{ env['STORAGE_INPUT_DIR'] }}"
-                                                                },
-                                                                {
                                                                     "name": "SB_NAMESPACE",
                                                                     "value": "{{ env['SB_NAMESPACE'] }}"
                                                                 },
@@ -116,13 +108,17 @@
                                                                 {
                                                                     "name": "SB_SHARED_ACCESS_KEY_VALUE",
                                                                     "value": "{{ env['SB_SHARED_ACCESS_KEY_VALUE'] }}"
+                                                                },
+                                                                {
+                                                                    "name": "VIDEO",
+                                                                    "value": "@triggerBody()?['Name']"
                                                                 }
                                                             ],
-                                                            "image": "{{ env['DOCKER_LOGIN'] }}/{{ env['QUEUER_IMAGE_REPO'] }}",
+                                                            "image": "{{ env['DOCKER_LOGIN'] }}/{{ env['ACI_IMAGE'] }}",
                                                             "resources": {
                                                                 "requests": {
                                                                     "cpu": 2,
-                                                                    "memoryInGB": 3.5
+                                                                    "memoryInGB": 5
                                                                 }
                                                             }
                                                         }
@@ -138,42 +134,31 @@
                                             }
                                         },
                                         "method": "put",
-                                        "path": "[parameters('workflows_{{ env['RESOURCE_GROUP'] }}_path')]",
+                                        "path": "[parameters('workflows_{{ env['LOGIC_APP'] }}_path')]",
                                         "queries": {
                                             "x-ms-api-version": "2017-10-01-preview"
-                                        }
-                                    }
-                                },
-                                "Get_blob_content": {
-                                    "runAfter": {},
-                                    "type": "ApiConnection",
-                                    "inputs": {
-                                        "host": {
-                                            "connection": {
-                                                "name": "@parameters('$connections')['azureblob']['connectionId']"
-                                            }
-                                        },
-                                        "method": "get",
-                                        "path": "/datasets/default/files/@{encodeURIComponent(encodeURIComponent(triggerBody()?['Path']))}/content",
-                                        "queries": {
-                                            "inferContentType": true
                                         }
                                     }
                                 }
                             },
                             "runAfter": {},
+                            "else": {
+                                "actions": {
+                                    "Terminate": {
+                                        "runAfter": {},
+                                        "type": "Terminate",
+                                        "inputs": {
+                                            "runStatus": "Cancelled"
+                                        }
+                                    }
+                                }
+                            },
                             "expression": {
                                 "and": [
                                     {
-                                        "startsWith": [
-                                            "@triggerBody()?['Name']",
-                                            "trigger"
-                                        ]
-                                    },
-                                    {
                                         "endsWith": [
                                             "@triggerBody()?['Name']",
-                                            ".txt"
+                                            ".mp4"
                                         ]
                                     }
                                 ]
@@ -229,7 +214,7 @@
             "location": "{{ env['REGION'] }}",
             "scale": null,
             "properties": {
-                "displayName": "DefaultEndpointsProtocol=https;AccountName={{ env['STORAGE_ACCOUNT_NAME'] }};AccountKey={{ env['STORAGE_ACCOUNT_KEY'] }};EndpointSuffix=core.windows.net",
+                "displayName": "{{ env['STORAGE_ACCOUNT_NAME'] }}",
                 "customParameterValues": {},
                 "api": {
                     "id": "[concat('/subscriptions/{{ env['SUBSCRIPTION_ID'] }}/providers/Microsoft.Web/locations/{{ env['REGION'] }}/managedApis/', parameters('connections_azureblob_name'))]"
@@ -239,4 +224,3 @@
         }
     ]
 }
-

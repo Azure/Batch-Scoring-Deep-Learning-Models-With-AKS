@@ -1,12 +1,11 @@
 rm -rf images/output_images
 rm -rf images/orangutan
-rm -rf videos
-rm -rf *_frames
+rm -rf orangutan*
 rm *.mp4
 rm *.mp3
 rm aks/Dockerfile
 rm aks/requirements.txt
-rm aks.json
+rm aks_deployment.json
 rm aci/Dockerfile
 rm aci/requirements.txt
 rm logic_app.json
