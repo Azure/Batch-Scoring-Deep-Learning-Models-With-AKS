@@ -11,9 +11,9 @@ def add_images_to_queue(
     style,
     storage_container, 
     queue, 
-    queue_limit, 
     block_blob_service, 
-    bus_service
+    bus_service,
+    queue_limit=None
 ):
     """
     :param input_dir: the input directory where the frames are stored
@@ -84,12 +84,12 @@ if __name__ == "__main__":
     )
 
     add_images_to_queue(
-        args.input_dir,
-        args.output_dir,
-        args.style,
-        args.storage_container_name,
-        args.queue,
-        args.queue_limit,
-        block_blob_service,
-        bus_service,
+        input_dir=args.input_dir,
+        output_dir=args.output_dir,
+        style=args.style,
+        storage_container=args.storage_container_name,
+        queue=args.queue,
+        block_blob_service=block_blob_service,
+        bus_service=bus_service,
+        queue_limit=args.queue_limit,
     )

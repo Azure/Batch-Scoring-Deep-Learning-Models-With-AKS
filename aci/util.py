@@ -16,23 +16,16 @@ class Parser:
 
     def append_main_args(self):
         self.parser.add_argument(
+            "--style",
+            dest="style",
+            help="The style name to use (exclude .pth).",
+            default=os.getenv("STYLE"),
+        )
+        self.parser.add_argument(
             "--video",
             dest="video",
             help="The name of the video in a storage container (including ext).",
             default=os.getenv("VIDEO"),
-        )
-        self.parser.add_argument(
-            "--audio-file",
-            dest="audio_file",
-            help="the name of the output audio file in your azure storage container",
-            default=os.getenv("AUDIO")
-        )
-        self.parser.add_argument(
-            "--queue-limit",
-            dest="queue_limit",
-            help="The maximum number of items to add to the queue.",
-            type=int,
-            default=None,
         )
         self.__append_storage_args()
         self.__append_service_bus_args()

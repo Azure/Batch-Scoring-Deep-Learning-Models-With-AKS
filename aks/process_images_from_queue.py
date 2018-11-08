@@ -77,6 +77,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--terminate",
         dest="terminate",
+				action="store_true",
         help="DEBUGGING ONLY - Terminate process if queue is empty.",
         default=False,
     )
@@ -214,7 +215,7 @@ if __name__ == "__main__":
         input_frame = msg_body["input_frame"]
         input_dir = msg_body["input_dir"]
         output_dir = msg_body["output_dir"]
-        log_dir = "log_{}".format(output_dir)
+        log_dir = "{}_logs".format(output_dir)
 
         # create a new file handler for style transfer logs
         log_file = "{}.log".format(".".join(input_frame.split(".")[:-1]))

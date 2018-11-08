@@ -20,7 +20,6 @@ if __name__ == "__main__":
 
     assert args.video is not None
     assert args.style is not None
-    assert args.output_dir is not None
     assert args.storage_container_name is not None
     assert args.storage_account_name is not None
     assert args.storage_account_key is not None
@@ -38,9 +37,7 @@ if __name__ == "__main__":
     frames_dir, audio = preprocess(
         block_blob_service=block_blob_service,
         video=args.video,
-        storage_container_name=args.storage_container_name,
-        frames_dir=args.frames_dir,
-        audio_file=args.audio_file
+        storage_container_name=args.storage_container_name
     )
 
     # service bus client
@@ -50,14 +47,16 @@ if __name__ == "__main__":
         shared_access_key_value=args.sb_key_value,
     )
 
+    # set output_dir
+    output_dir = "{}_processed".format(frames_dir)
+
     # add all images from frame_dir to the queue
     add_images_to_queue(
         input_dir=frames_dir,
-        output_dir=args.output_dir,
+        output_dir=output_dir,
         style=args.style,
-        storage_container_name=args.storage_container_name,
+        storage_container=args.storage_container_name,
         queue=args.queue,
-        queue_limit=args.queue_limit,
         block_blob_service=block_blob_service,
         bus_service=bus_service,
     )

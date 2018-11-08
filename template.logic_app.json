@@ -110,6 +110,10 @@
                                                                     "value": "{{ env['SB_SHARED_ACCESS_KEY_VALUE'] }}"
                                                                 },
                                                                 {
+                                                                    "name": "STYLE",
+                                                                    "value": "{{ env['STYLE'] }}"
+                                                                },
+                                                                {
                                                                     "name": "VIDEO",
                                                                     "value": "@triggerBody()?['Name']"
                                                                 }
