@@ -6,14 +6,14 @@ from util import Parser
 
 
 def add_images_to_queue(
-    input_dir, 
-    output_dir, 
+    input_dir,
+    output_dir,
     style,
-    storage_container, 
-    queue, 
-    block_blob_service, 
+    storage_container,
+    queue,
+    block_blob_service,
     bus_service,
-    queue_limit=None
+    queue_limit=None,
 ):
     """
     :param input_dir: the input directory where the frames are stored
@@ -48,7 +48,7 @@ def add_images_to_queue(
             "input_frame": blob.name.split("/")[-1],
             "input_dir": blob.name.split("/")[0],
             "output_dir": output_dir,
-            "style": style
+            "style": style,
         }
         msg = Message(str(msg_body).encode())
 

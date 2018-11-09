@@ -1,9 +1,11 @@
 from azure.servicebus import ServiceBusService, Message, Queue
 from azure.storage.blob import BlockBlobService
 from preprocess import preprocess
+from postprocess import postprocess
 from add_images_to_queue import add_images_to_queue
 from util import Parser
 import os
+import time
 
 
 if __name__ == "__main__":
@@ -37,7 +39,7 @@ if __name__ == "__main__":
     frames_dir, audio = preprocess(
         block_blob_service=block_blob_service,
         video=args.video,
-        storage_container_name=args.storage_container_name
+        storage_container_name=args.storage_container_name,
     )
 
     # service bus client
@@ -48,11 +50,12 @@ if __name__ == "__main__":
     )
 
     # set output_dir
+    input_dir = frames_dir
     output_dir = "{}_processed".format(frames_dir)
 
     # add all images from frame_dir to the queue
     add_images_to_queue(
-        input_dir=frames_dir,
+        input_dir=input_dir,
         output_dir=output_dir,
         style=args.style,
         storage_container=args.storage_container_name,
@@ -61,3 +64,27 @@ if __name__ == "__main__":
         bus_service=bus_service,
     )
 
+    # get num of output input frames
+    input_frames = block_blob_service.list_blobs(
+        args.storage_container_name, prefix=input_dir
+    )
+    output_video = "{}_processed.mp4".format(args.video.split(".")[0])
+
+    # poll storage for output
+    while True:
+        output_frames = block_blob_service.list_blobs(
+            args.storage_container_name, prefix=output_dir
+        )
+        if len(output_frames) == len(input_frames):
+            postprocess(
+                block_blob_service=block_blob_service,
+                storage_container=args.storage_container_name,
+                frames_dir=output_dir,
+                audio_file=audio,
+                video_file=output_video,
+            )
+            break
+
+        else:
+            time.sleep(10)
+            continue

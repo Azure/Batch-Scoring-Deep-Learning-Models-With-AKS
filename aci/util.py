@@ -10,7 +10,6 @@ class Parser:
     def __init__(self):
         self.parser = argparse.ArgumentParser()
 
-
     def return_args(self):
         return self.parser.parse_args()
 
@@ -30,26 +29,11 @@ class Parser:
         self.__append_storage_args()
         self.__append_service_bus_args()
 
+    def append_postprocess_args(self):
+        self.__append_video_args()
+
     def append_preprocess_args(self):
-        self.parser.add_argument(
-            "--frames-dir",
-            dest="frames_dir",
-            help="the name of the output frames directory in your azure storage container",
-            default=None,
-        )
-        self.parser.add_argument(
-            "--video",
-            dest="video",
-            help="The name of the video in a storage container (including ext).",
-            default=os.getenv("VIDEO"),
-        )
-        self.parser.add_argument(
-            "--audio-file",
-            dest="audio_file",
-            help="the name of the output audio file in your azure storage container",
-            default=os.getenv("AUDIO"),
-        )
-        self.__append_storage_args()
+        self.__append_video_args()
 
     def append_add_images_to_queue_args(self):
         self.parser.add_argument(
@@ -79,6 +63,27 @@ class Parser:
         )
         self.__append_storage_args()
         self.__append_service_bus_args()
+
+    def __append_video_args(self):
+        self.parser.add_argument(
+            "--frames-dir",
+            dest="frames_dir",
+            help="the name of the output frames directory in your azure storage container",
+            default=None,
+        )
+        self.parser.add_argument(
+            "--video",
+            dest="video",
+            help="The name of the video in a storage container (including ext).",
+            default=os.getenv("VIDEO"),
+        )
+        self.parser.add_argument(
+            "--audio",
+            dest="audio",
+            help="the name of the output audio file in your azure storage container",
+            default=os.getenv("AUDIO"),
+        )
+        self.__append_storage_args()
 
     def __append_storage_args(self):
         self.parser.add_argument(

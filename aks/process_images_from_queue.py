@@ -77,7 +77,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--terminate",
         dest="terminate",
-				action="store_true",
+        action="store_true",
         help="DEBUGGING ONLY - Terminate process if queue is empty.",
         default=False,
     )
@@ -204,7 +204,9 @@ if __name__ == "__main__":
                 )
                 exit(0)
             else:
-                logger.debug("Receiver has timed out, queue is empty. Waiting 1 minute before trying again...")
+                logger.debug(
+                    "Receiver has timed out, queue is empty. Waiting 1 minute before trying again..."
+                )
                 time.sleep(60)
                 continue
 
@@ -258,9 +260,7 @@ if __name__ == "__main__":
             local_output_file,
         )
         block_blob_service.create_blob_from_path(
-            az_blob_container_name,
-            "{}/{}".format(log_dir, log_file),
-            local_log_file,
+            az_blob_container_name, "{}/{}".format(log_dir, log_file), local_log_file
         )
         logger.debug("Uploaded output file and log file to storage")
 
