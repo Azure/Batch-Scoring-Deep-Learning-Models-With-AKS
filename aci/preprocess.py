@@ -19,7 +19,7 @@ def preprocess(
     returns generated frames directory and audio file
     """
     # create tmp dir
-    tmp_dir = ".tmp_aci"
+    tmp_dir = ".tmp_aci_pre"
     pathlib.Path(tmp_dir).mkdir(parents=True, exist_ok=True)
 
     # download video file
@@ -66,7 +66,7 @@ def preprocess(
 
     # upload audio file
     block_blob_service.create_blob_from_path(
-        storage_container_name, audio_file, os.path.join(".tmp_aci", audio_file)
+        storage_container_name, audio_file, os.path.join(tmp_dir, audio_file)
     )
 
     return frames_dir, audio_file

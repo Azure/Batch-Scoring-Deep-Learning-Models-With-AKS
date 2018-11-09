@@ -38,8 +38,9 @@ def add_images_to_queue(
             queue,
         )
     )
+    count = 0
     for i, blob in enumerate(blob_iterator):
-
+        count += 1
         if queue_limit is not None and i >= queue_limit:
             print("Queue limit is reached. Exiting process...")
             exit(0)
@@ -51,9 +52,8 @@ def add_images_to_queue(
             "style": style,
         }
         msg = Message(str(msg_body).encode())
-
-        print("Adding {} to queue...".format(blob.name.split("/")[-1]))
         bus_service.send_queue_message(queue, msg)
+    print("All {} images added to queue...".format(count))
 
 
 if __name__ == "__main__":

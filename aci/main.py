@@ -66,16 +66,20 @@ if __name__ == "__main__":
 
     # get num of output input frames
     input_frames = block_blob_service.list_blobs(
-        args.storage_container_name, prefix=input_dir
+        args.storage_container_name, prefix="{}/".format(input_dir)
     )
+    input_frames_length = sum(1 for x in input_frames)
     output_video = "{}_processed.mp4".format(args.video.split(".")[0])
 
     # poll storage for output
+    print("Polling directory {} in storage for output.".format(output_dir))
     while True:
         output_frames = block_blob_service.list_blobs(
-            args.storage_container_name, prefix=output_dir
+            args.storage_container_name, prefix="{}/".format(output_dir)
         )
-        if len(output_frames) == len(input_frames):
+        output_frames_length = sum(1 for x in output_frames)
+        if output_frames_length == input_frames_length:
+            print("Images have finished processing. Stitching video together.")
             postprocess(
                 block_blob_service=block_blob_service,
                 storage_container=args.storage_container_name,
@@ -86,5 +90,6 @@ if __name__ == "__main__":
             break
 
         else:
+            print("Images are still processing. Retrying in 10 seconds...")
             time.sleep(10)
             continue

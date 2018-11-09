@@ -17,8 +17,9 @@ def postprocess(
     :param block_blob_service: blob client
     :param frames_dir: the input directory in Azure storage to download the processed frames from
     :param audio_file: the input audio file in Azure storage to reconstruct the video with (include ext)
-    :param video_file: the output video file to store to blob (exclude ext)
+    :param video_file: the output video file to store to blob (include ext)
     """
+
     tmp_dir = ".tmp_aci_post"
     pathlib.Path(os.path.join(tmp_dir, frames_dir)).mkdir(parents=True, exist_ok=True)
 
@@ -38,10 +39,13 @@ def postprocess(
             os.path.join(tmp_dir, frames_dir, frame_name),
         )
 
+    # set video file without audio name
+    video_file_without_audio = "{}_without_audio.mp4".format(video_file.split(".")[0])
+
     # stitch frames to generate new video with ffmpeg
     subprocess.run(
-        "ffmpeg -framerate 30 -i {}/%05d_frame.jpg -c:v libx264 -profile:v high -crf 20 -pix_fmt yuv420p -y {}_without_audio.mp4".format(
-            os.path.join(tmp_dir, frames_dir), video_file
+        "ffmpeg -framerate 30 -i {}/%05d_frame.jpg -c:v libx264 -profile:v high -crf 20 -pix_fmt yuv420p -y {}".format(
+            os.path.join(tmp_dir, frames_dir), os.path.join(tmp_dir, video_file_without_audio)
         ),
         shell=True,
         check=True,
@@ -49,8 +53,10 @@ def postprocess(
 
     # reattach audio to the newly generated video
     subprocess.run(
-        "ffmpeg -i {}_without_audio.mp4 -i {} -map 0:0 -map 1:0 -vcodec copy -acodec copy -y {}.mp4".format(
-            video_file, audio_file, video_file
+        "ffmpeg -i {} -i {} -map 0:0 -map 1:0 -vcodec copy -acodec copy -y {}".format(
+            os.path.join(tmp_dir, video_file_without_audio), 
+            os.path.join(tmp_dir, audio_file), 
+            os.path.join(tmp_dir, video_file)
         ),
         shell=True,
         check=True,
@@ -58,7 +64,7 @@ def postprocess(
 
     # upload video to blob
     block_blob_service.create_blob_from_path(
-        storage_container, video_file, os.path.join(".tmp_aci", video_file)
+        storage_container, video_file, os.path.join(tmp_dir, video_file)
     )
 
     return
