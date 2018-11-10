@@ -20,7 +20,7 @@ def postprocess(
     :param video_file: the output video file to store to blob (include ext)
     """
 
-    tmp_dir = ".tmp_aci_post"
+    tmp_dir = ".aci_post"
     pathlib.Path(os.path.join(tmp_dir, frames_dir)).mkdir(parents=True, exist_ok=True)
 
     # download audio from storage to temp dir
@@ -29,7 +29,7 @@ def postprocess(
     )
 
     # download images from blob to temp dir
-    frames = block_blob_service.list_blobs(storage_container, prefix=frames_dir)
+    frames = block_blob_service.list_blobs(storage_container, prefix="{}/".format(frames_dir))
 
     for frame in frames:
         frame_name = frame.name.split("/")[-1]
@@ -79,7 +79,7 @@ if __name__ == "__main__":
     assert args.frames_dir is not None
     assert args.audio is not None
     assert args.video is not None
-    assert args.storage_container_name is not None
+    assert args.storage_container is not None
     assert args.storage_account_name is not None
     assert args.storage_account_key is not None
 
@@ -89,7 +89,7 @@ if __name__ == "__main__":
 
     postprocess(
         block_blob_service=block_blob_service,
-        storage_container=args.storage_container_name,
+        storage_container=args.storage_container,
         frames_dir=args.frames_dir,
         audio_file=args.audio,
         video_file=args.video,

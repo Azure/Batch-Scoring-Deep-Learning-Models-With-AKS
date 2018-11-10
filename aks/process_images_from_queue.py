@@ -9,12 +9,12 @@ import util
 from logging.handlers import RotatingFileHandler
 
 
-def add_file_handler(logger, log_file):
+def add_file_handler(logger, log_path):
     """
-    :param log_file: the log file to attach the handler to
+    :param log_path: the log file to attach the handler to
     """
     handler_format = util.get_handler_format()
-    file_handler = RotatingFileHandler(log_file, maxBytes=20000)
+    file_handler = RotatingFileHandler(log_path, maxBytes=20000)
     file_handler.setFormatter(handler_format)
     logger.addHandler(file_handler)
 
@@ -55,12 +55,7 @@ def download_models(block_blob_service, model_dir, storage_container, tmp_model_
 
 
 def dequeue(
-    block_blob_service,
-    bus_service,
-    model_dir,
-    storage_container,
-    queue,
-    terminate=None,
+    block_blob_service, bus_service, model_dir, storage_container, queue, terminate=None
 ):
     """
     :param block_blob_service: blob client
@@ -74,7 +69,7 @@ def dequeue(
     logger = logging.getLogger("root")
 
     # make .tmp dir and input/output/model folders in it
-    tmp_dir = ".tmp"
+    tmp_dir = ".aks"
     tmp_input_dir = os.path.join(tmp_dir, "input")
     tmp_output_dir = os.path.join(tmp_dir, "output")
     tmp_model_dir = os.path.join(tmp_dir, "models")

@@ -7,7 +7,7 @@ from util import Parser
 
 
 def preprocess(
-    block_blob_service, video, storage_container_name, frames_dir=None, audio_file=None
+    block_blob_service, video, storage_container, frames_dir=None, audio_file=None
 ):
     """
     this function uses ffmpeg on the `video` to create
@@ -19,12 +19,12 @@ def preprocess(
     returns generated frames directory and audio file
     """
     # create tmp dir
-    tmp_dir = ".tmp_aci_pre"
+    tmp_dir = ".aci_pre"
     pathlib.Path(tmp_dir).mkdir(parents=True, exist_ok=True)
 
     # download video file
     block_blob_service.get_blob_to_path(
-        storage_container_name, video, os.path.join(tmp_dir, video)
+        storage_container, video, os.path.join(tmp_dir, video)
     )
 
     # generate frames_dir name based on video name if not explicitly provided
@@ -59,14 +59,14 @@ def preprocess(
     # upload all frames
     for img in os.listdir(os.path.join(tmp_dir, frames_dir)):
         block_blob_service.create_blob_from_path(
-            storage_container_name,
+            storage_container,
             os.path.join(frames_dir, img),
             os.path.join(tmp_dir, frames_dir, img),
         )
 
     # upload audio file
     block_blob_service.create_blob_from_path(
-        storage_container_name, audio_file, os.path.join(tmp_dir, audio_file)
+        storage_container, audio_file, os.path.join(tmp_dir, audio_file)
     )
 
     return frames_dir, audio_file
@@ -78,7 +78,7 @@ if __name__ == "__main__":
     args = parser.return_args()
 
     assert args.video is not None
-    assert args.storage_container_name is not None
+    assert args.storage_container is not None
     assert args.storage_account_name is not None
     assert args.storage_account_key is not None
 
@@ -89,7 +89,7 @@ if __name__ == "__main__":
     preprocess(
         block_blob_service,
         args.video,
-        args.storage_container_name,
+        args.storage_container,
         args.frames_dir,
         args.audio,
     )

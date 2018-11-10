@@ -1,5 +1,12 @@
 import argparse
+import logging
 import os
+
+
+def get_handler_format():
+    return logging.Formatter(
+        "%(asctime)s [%(name)s:%(filename)s:%(lineno)s] %(levelname)s - %(message)s"
+    )
 
 
 class Parser:
@@ -87,8 +94,8 @@ class Parser:
 
     def __append_storage_args(self):
         self.parser.add_argument(
-            "--storage-container-name",
-            dest="storage_container_name",
+            "--storage-container",
+            dest="storage_container",
             help="The name storage container.",
             default=os.getenv("STORAGE_CONTAINER_NAME"),
         )
