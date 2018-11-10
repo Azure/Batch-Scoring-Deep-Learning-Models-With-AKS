@@ -10,7 +10,11 @@ import sys
 
 if __name__ == "__main__":
     """
-    TODO
+    This script is a long running script that will continuously
+    pull messages from a specified Service Bus queue. As messages
+    are pulled off the queue, it will process the referenced
+    image in the queue with the neural style transfer script. All
+    processed images will be stored in blob.
     """
 
     # setup parser
@@ -64,13 +68,6 @@ if __name__ == "__main__":
         default=os.getenv("SB_SHARED_ACCESS_KEY_VALUE"),
     )
     parser.add_argument(
-        "--dequeue-limit",
-        dest="dequeue_limit",
-        type=int,
-        help="DEBUGGING ONLY - The number of items to dequeue before terminating this process.",
-        default=None,
-    )
-    parser.add_argument(
         "--terminate",
         dest="terminate",
         action="store_true",
@@ -116,6 +113,5 @@ if __name__ == "__main__":
         model_dir=args.model_dir,
         storage_container=args.storage_container,
         queue=args.queue,
-        dequeue_limit=args.dequeue_limit,
         terminate=args.terminate,
     )

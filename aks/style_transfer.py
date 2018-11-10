@@ -204,9 +204,6 @@ if __name__ == "__main__":
         print("ERROR: cuda is not available, try running on CPU")
         sys.exit(1)
 
-    # os.makedirs(args.output_dir, exist_ok=True)
-    # stylize(args)
-
     # set up logger
     handler_format = logging.Formatter(
         "%(asctime)s [%(name)s:%(filename)s:%(lineno)s] %(levelname)s - %(message)s"

@@ -31,9 +31,7 @@ def download_models(block_blob_service, model_dir, storage_container, tmp_model_
     models = block_blob_service.list_blobs(
         storage_container, prefix="{}/".format(model_dir)
     )
-    logger.debug(
-        "Downloading style models from directory {}".format(model_dir)
-    )
+    logger.debug("Downloading style models from directory {}".format(model_dir))
 
     model_names = []
     for model in models:
@@ -62,7 +60,6 @@ def dequeue(
     model_dir,
     storage_container,
     queue,
-    dequeue_limit=None,
     terminate=None,
 ):
     """
@@ -71,7 +68,6 @@ def dequeue(
     :param model_dir: the directory in storage where models are stored
     :param storage_container: the storage container in blob
     :param queue: the name of the queue
-    :param dequeue_limit: (optional) used for debugging - a limit to dequeue
     :param terminate: (optional) used for debugging - terminate process instead of stay alive
     """
 
@@ -98,21 +94,7 @@ def dequeue(
     # start listening...
     logger.debug("Start listening to queue '{}' on service bus...".format(queue))
 
-    # set up dequeue counter
-    i = 0
-
     while True:
-
-        # check if dequeue limit is reached, exit if so
-        if dequeue_limit is not None and dequeue_limit == i:
-            logger.debug(
-                "Dequeue limit of {} is reached. Exiting program...".format(
-                    dequeue_limit
-                )
-            )
-            exit(0)
-        else:
-            i += 1
 
         # inspect queue
         logger.debug("Peek queue...")
@@ -146,8 +128,8 @@ def dequeue(
         logger.debug("Queue message body: {}".format(msg_body))
 
         # set input/output file vars
-        tmp_input_path = os.path.join(tmp_dir, "input", input_frame) 
-        tmp_model_path = os.path.join(tmp_dir, "models", style) 
+        tmp_input_path = os.path.join(tmp_dir, "input", input_frame)
+        tmp_model_path = os.path.join(tmp_dir, "models", style)
         tmp_output_path = os.path.join(tmp_dir, "output", input_frame)
         tmp_log_path = os.path.join(tmp_dir, "logs", log_file)
 
@@ -155,20 +137,24 @@ def dequeue(
         block_blob_service.get_blob_to_path(
             storage_container,
             os.path.join(storage_input_dir, input_frame),
-            tmp_input_path
+            tmp_input_path,
         )
 
         # run style transfer
-        logger.debug("Starting style transfer on {}/{}".format(storage_input_dir, input_frame))
+        logger.debug(
+            "Starting style transfer on {}/{}".format(storage_input_dir, input_frame)
+        )
         style_transfer.stylize(
             content_scale=None,
             model_dir=tmp_model_dir,
             cuda=1,
             style=style,
             content_dir=tmp_input_dir,
-            output_dir=tmp_output_dir
+            output_dir=tmp_output_dir,
         )
-        logger.debug("Finished style transfer on {}/{}".format(storage_input_dir, input_frame))
+        logger.debug(
+            "Finished style transfer on {}/{}".format(storage_input_dir, input_frame)
+        )
 
         # upload output + log file
         block_blob_service.create_blob_from_path(
