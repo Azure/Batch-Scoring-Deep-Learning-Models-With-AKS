@@ -164,7 +164,15 @@
                                             "@triggerBody()?['Name']",
                                             ".mp4"
                                         ]
-                                    }
+                                    },
+																		{
+																				"not": {
+																						"contains": [
+																								"@triggerBody()?['Name']",
+																								"processed"
+																						]
+																				}
+																		}
                                 ]
                             },
                             "type": "If"

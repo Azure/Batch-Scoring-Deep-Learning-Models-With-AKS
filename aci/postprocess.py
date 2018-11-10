@@ -45,7 +45,8 @@ def postprocess(
     # stitch frames to generate new video with ffmpeg
     subprocess.run(
         "ffmpeg -framerate 30 -i {}/%05d_frame.jpg -c:v libx264 -profile:v high -crf 20 -pix_fmt yuv420p -y {}".format(
-            os.path.join(tmp_dir, frames_dir), os.path.join(tmp_dir, video_file_without_audio)
+            os.path.join(tmp_dir, frames_dir),
+            os.path.join(tmp_dir, video_file_without_audio),
         ),
         shell=True,
         check=True,
@@ -54,9 +55,9 @@ def postprocess(
     # reattach audio to the newly generated video
     subprocess.run(
         "ffmpeg -i {} -i {} -map 0:0 -map 1:0 -vcodec copy -acodec copy -y {}".format(
-            os.path.join(tmp_dir, video_file_without_audio), 
-            os.path.join(tmp_dir, audio_file), 
-            os.path.join(tmp_dir, video_file)
+            os.path.join(tmp_dir, video_file_without_audio),
+            os.path.join(tmp_dir, audio_file),
+            os.path.join(tmp_dir, video_file),
         ),
         shell=True,
         check=True,
