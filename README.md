@@ -53,7 +53,8 @@ Run `az aks browse -n $aks_cluster -g $resource_group` in your terminal so that 
 
 ## Steps
 Run throught the following notebooks:
-1. [Setup Azure](/01_setup_azure.ipynb).
+0. [Test the Style Transfer Script](/00_test_neural_style_transfer.ipynb)
+1. [Setup Azure - Resource group, Storage, Service Bus](/01_setup_azure.ipynb).
 2. [Apply Style Transfer Locally](./02_style_transfer_locally.ipynb)
 3. [Apply Style Transfer on AKS](./03_style_transfer_on_aks.ipynb)
 4. [Deploy Logic Apps](./04_deploy_logic_app.ipynb)
