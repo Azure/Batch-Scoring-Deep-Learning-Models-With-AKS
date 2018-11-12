@@ -4,7 +4,7 @@
 ## Overview
 In this repository, we use the scenario of applying style transfer onto a video (collection of images). This architecture can be generalized for any batch scoring with deep learning scenario.
 
-## Design (TODO)
+## Design
 ![Reference Architecture Diagram](https://happypathspublic.blob.core.windows.net/assets/batch_scoring_for_dl/batchscoringdl-aks-architecture-diagram.PNG)
 
 The above architecture works as follows:
@@ -41,14 +41,27 @@ While it is not required, it is also useful to use the [Azure Storage Explorer](
 
 ## Setup
 
+1. Clone the repo `git clone <repo-name>`
+2. `cd` into the repo
+3. Setup your conda env using the _environment.yml_ file `conda env create -f environment.yml` - this will create a conda environment called __batchscoringdl__
+4. Activate your environment `source activate batchscoringdl`
+5. Log in to Azure using the __az cli__ `az login`
+6. Log in to Docker using the docker cli `docker login`
+
 #### Run the Kubernetes Dashboard
 Run `az aks browse -n $aks_cluster -g $resource_group` in your terminal so that you can use the Kubernetes Dashboard. If you're not able to access the dashboard, follow the instructions [here](https://blog.tekspace.io/kubernetes-dashboard-remote-access/).
 
 ## Steps
-To start
+Run throught the following notebooks:
+1. [Setup Azure](/01_setup_azure.ipynb).
+2. [Apply Style Transfer Locally](./02_style_transfer_locally.ipynb)
+3. [Apply Style Transfer on AKS](./03_style_transfer_on_aks.ipynb)
+4. [Deploy Logic Apps](./04_deploy_logic_app.ipynb)
 
-##Clean up
-Please refer to the [last notebook](./07_stitch_together_the_results.ipynb) to clean up your Azure resources. If you want to keep certain resources, you can also use the `az cli` or the Azure portal to cherry pick the ones you want to deprovision.
+## Clean up
+To clean up your working directory, you can run the `clean_up.sh` script that comes with this repo. This will remove all temporary directories that were generated as well as any configuration (such as Dockerfiles) that were created during the tutorials. This script will _not_ remove the `.env` file. 
+
+To clean up your Azure resources, you can simply delete the resource group that all your resources were deployed into. This can be done in the `az cli` using the command `az group delete --name <name-of-your-resource-group>`, or in the portal. If you want to keep certain resources, you can also use the `az cli` or the Azure portal to cherry pick the ones you want to deprovision.
 
 # Contributing
 
