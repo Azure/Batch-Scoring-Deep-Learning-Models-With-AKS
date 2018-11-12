@@ -29,7 +29,9 @@ def postprocess(
     )
 
     # download images from blob to temp dir
-    frames = block_blob_service.list_blobs(storage_container, prefix="{}/".format(frames_dir))
+    frames = block_blob_service.list_blobs(
+        storage_container, prefix="{}/".format(frames_dir)
+    )
 
     for frame in frames:
         frame_name = frame.name.split("/")[-1]
@@ -44,7 +46,7 @@ def postprocess(
 
     # stitch frames to generate new video with ffmpeg
     subprocess.run(
-        "ffmpeg -framerate 30 -i {}/%05d_frame.jpg -c:v libx264 -profile:v high -crf 20 -pix_fmt yuv420p -y {}".format(
+        "ffmpeg -framerate 30 -i {}/%06d_frame.jpg -c:v libx264 -profile:v high -crf 20 -pix_fmt yuv420p -y {}".format(
             os.path.join(tmp_dir, frames_dir),
             os.path.join(tmp_dir, video_file_without_audio),
         ),

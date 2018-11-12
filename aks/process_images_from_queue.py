@@ -118,15 +118,15 @@ def dequeue(
         storage_log_dir = "{}_logs".format(storage_output_dir)
 
         # create a new file handler for style transfer logs
-        log_file = "{}.log".format(input_frame.split(".")[-1])
+        log_file = "{}.log".format(input_frame.split(".")[0])
         add_file_handler(logger, os.path.join(tmp_log_dir, log_file))
         logger.debug("Queue message body: {}".format(msg_body))
 
         # set input/output file vars
-        tmp_input_path = os.path.join(tmp_dir, "input", input_frame)
-        tmp_model_path = os.path.join(tmp_dir, "models", style)
-        tmp_output_path = os.path.join(tmp_dir, "output", input_frame)
-        tmp_log_path = os.path.join(tmp_dir, "logs", log_file)
+        tmp_input_path = os.path.join(tmp_input_dir, input_frame)
+        tmp_model_path = os.path.join(tmp_model_dir, style)
+        tmp_output_path = os.path.join(tmp_output_dir, input_frame)
+        tmp_log_path = os.path.join(tmp_log_dir, log_file)
 
         # download blob to temp dir
         block_blob_service.get_blob_to_path(

@@ -44,7 +44,9 @@ if __name__ == "__main__":
     console_handler = logging.StreamHandler(sys.stdout)
     console_handler.setFormatter(handler_format)
     tmp_log_file = "{}.log".format(video_name)
-    file_handler = RotatingFileHandler(os.path.join(tmp_dir, tmp_log_file), maxBytes=20000)
+    file_handler = RotatingFileHandler(
+        os.path.join(tmp_dir, tmp_log_file), maxBytes=20000
+    )
     file_handler.setFormatter(handler_format)
     logger = logging.getLogger("root")
     logger.setLevel(logging.DEBUG)
@@ -94,7 +96,11 @@ if __name__ == "__main__":
     logger.debug("Adding image to queue finished. Time taken: {}".format(t2 - t1))
 
     # poll storage for output
-    logger.debug("Polling for input images {} to equal output images {}".format(input_dir, output_dir))
+    logger.debug(
+        "Polling for input images {} to equal output images {}".format(
+            input_dir, output_dir
+        )
+    )
 
     input_frames = block_blob_service.list_blobs(
         args.storage_container, prefix="{}/".format(input_dir)
@@ -109,10 +115,18 @@ if __name__ == "__main__":
         output_frames_length = sum(1 for x in output_frames)
         if output_frames_length == input_frames_length:
             t3 = time.time()
-            logger.debug("Polling succeeded, images have finished processing. Time taken: {}".format(t3 - t2))
+            logger.debug(
+                "Polling succeeded, images have finished processing. Time taken: {}".format(
+                    t3 - t2
+                )
+            )
 
             # postprocess video
-            logger.debug("Stitching video together using processed frames dir '{}' and audio file '{}'.".format(output_dir, audio))
+            logger.debug(
+                "Stitching video together using processed frames dir '{}' and audio file '{}'.".format(
+                    output_dir, audio
+                )
+            )
             postprocess(
                 block_blob_service=block_blob_service,
                 storage_container=args.storage_container,
@@ -130,12 +144,10 @@ if __name__ == "__main__":
             continue
 
     # upload log file to blob
-    t5 = time.time()  
+    t5 = time.time()
     logger.debug("Process ending. Total time taken: {}".format(t5 - t0))
     block_blob_service.create_blob_from_path(
         args.storage_container,
         "{}.log".format(video_name),
-        os.path.join(tmp_dir, tmp_log_file)
+        os.path.join(tmp_dir, tmp_log_file),
     )
-
-        

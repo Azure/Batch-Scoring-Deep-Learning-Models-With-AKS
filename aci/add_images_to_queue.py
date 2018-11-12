@@ -34,9 +34,7 @@ def add_images_to_queue(
     # for all images found, add to queue
     logger.debug(
         "Adding {} images in the directory '{}' to the queue '{}'.".format(
-            queue_limit if queue_limit is not None else "all",
-            input_dir,
-            queue,
+            queue_limit if queue_limit is not None else "all", input_dir, queue
         )
     )
     count = 0
