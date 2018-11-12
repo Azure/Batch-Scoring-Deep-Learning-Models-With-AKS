@@ -53,11 +53,11 @@ Run `az aks browse -n $aks_cluster -g $resource_group` in your terminal so that 
 
 ## Steps
 Run throught the following notebooks:
-0. [Test the Style Transfer Script](/00_test_neural_style_transfer.ipynb)
-1. [Setup Azure - Resource group, Storage, Service Bus](/01_setup_azure.ipynb).
-2. [Apply Style Transfer Locally](./02_style_transfer_locally.ipynb)
-3. [Apply Style Transfer on AKS](./03_style_transfer_on_aks.ipynb)
-4. [Deploy Logic Apps](./04_deploy_logic_app.ipynb)
+1. [Test the Style Transfer Script](/00_test_neural_style_transfer.ipynb)
+2. [Setup Azure - Resource group, Storage, Service Bus](/01_setup_azure.ipynb).
+3. [Apply Style Transfer Locally](./02_style_transfer_locally.ipynb)
+4. [Apply Style Transfer on AKS](./03_style_transfer_on_aks.ipynb)
+5. [Deploy Logic Apps](./04_deploy_logic_app.ipynb)
 
 ## Clean up
 To clean up your working directory, you can run the `clean_up.sh` script that comes with this repo. This will remove all temporary directories that were generated as well as any configuration (such as Dockerfiles) that were created during the tutorials. This script will _not_ remove the `.env` file. 
