@@ -4,6 +4,7 @@ import os
 import sys
 import re
 import logging
+import util
 from PIL import Image
 import torch
 from torchvision import transforms
@@ -205,11 +206,8 @@ if __name__ == "__main__":
         sys.exit(1)
 
     # set up logger
-    handler_format = logging.Formatter(
-        "%(asctime)s [%(name)s:%(filename)s:%(lineno)s] %(levelname)s - %(message)s"
-    )
     console_handler = logging.StreamHandler(sys.stdout)
-    console_handler.setFormatter(handler_format)
+    console_handler.setFormatter(util.get_handler_format())
     logger = logging.getLogger("root")
     logger.setLevel(logging.DEBUG)
     logger.addHandler(console_handler)

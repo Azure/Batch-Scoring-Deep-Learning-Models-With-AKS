@@ -3,6 +3,8 @@ rm -rf .aci_pre
 rm -rf .aci_post
 rm -rf .aci_main
 rm -rf .aks
+rm -rf output_dir
+rm -rf content_dir
 
 # rm downloaded video and audio files
 rm *.mp4
