@@ -22,12 +22,6 @@ class Parser:
 
     def append_main_args(self):
         self.parser.add_argument(
-            "--style",
-            dest="style",
-            help="The style name to use (exclude .pth).",
-            default=os.getenv("STYLE"),
-        )
-        self.parser.add_argument(
             "--video",
             dest="video",
             help="The name of the video in a storage container (including ext).",
@@ -43,12 +37,6 @@ class Parser:
         self.__append_video_args()
 
     def append_add_images_to_queue_args(self):
-        self.parser.add_argument(
-            "--style",
-            dest="style",
-            help="The style name to use (exclude .pth).",
-            default=None,
-        )
         self.parser.add_argument(
             "--input-dir",
             dest="input_dir",

@@ -15,7 +15,7 @@
             "type": "String"
         },
         "workflows_{{ env['LOGIC_APP'] }}_path": {
-            "defaultValue": "/subscriptions/@{encodeURIComponent('{{ env['SUBSCRIPTION_ID'] }}')}/resourceGroups/@{encodeURIComponent('{{ env['RESOURCE_GROUP'] }}')}/providers/Microsoft.ContainerInstance/containerGroups/@{encodeURIComponent('{{ env['ACI_CONTAINER_GROUP'] }}')}",
+            "defaultValue": "/subscriptions/@{encodeURIComponent('{{ env['SUBSCRIPTION_ID'] }}')}/resourceGroups/@{encodeURIComponent('{{ env['RESOURCE_GROUP'] }}')}/providers/Microsoft.ContainerInstance/containerGroups/@{encodeURIComponent('{{ env['ACI_GROUP'] }}')}",
             "type": "String"
         }
     },
@@ -108,10 +108,6 @@
                                                                 {
                                                                     "name": "SB_SHARED_ACCESS_KEY_VALUE",
                                                                     "value": "{{ env['SB_SHARED_ACCESS_KEY_VALUE'] }}"
-                                                                },
-                                                                {
-                                                                    "name": "STYLE",
-                                                                    "value": "{{ env['STYLE'] }}"
                                                                 },
                                                                 {
                                                                     "name": "VIDEO",

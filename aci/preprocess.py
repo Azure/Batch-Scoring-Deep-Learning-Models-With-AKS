@@ -45,9 +45,9 @@ def preprocess(
     if audio_file is None:
         audio_file = "{}_audio.aac".format(video.split(".")[0])
 
-        # video pre-processing: audio extraction
+    # video pre-processing: audio extraction
     subprocess.run(
-        "ffmpeg -i {} {}".format(
+        "ffmpeg -y -i {} {}".format(
             os.path.join(tmp_dir, video), os.path.join(tmp_dir, audio_file)
         ),
         shell=True,
@@ -56,7 +56,7 @@ def preprocess(
 
     # video pre-processing: split to frames
     subprocess.run(
-        "ffmpeg -i {} {}/%06d_frame.jpg -hide_banner".format(
+        "ffmpeg -y -i {} {}/%06d_frame.jpg -hide_banner".format(
             os.path.join(tmp_dir, video), os.path.join(tmp_dir, frames_dir)
         ),
         shell=True,

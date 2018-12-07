@@ -6,6 +6,7 @@ import time
 import os
 import logging
 import util
+import torch
 from logging.handlers import RotatingFileHandler
 
 
@@ -31,7 +32,7 @@ def download_models(block_blob_service, model_dir, storage_container, tmp_model_
     models = block_blob_service.list_blobs(
         storage_container, prefix="{}/".format(model_dir)
     )
-    logger.debug("Downloading style models from directory {}".format(model_dir))
+    logger.debug("Downloading style model from directory {}".format(model_dir))
 
     model_names = []
     for model in models:
@@ -80,11 +81,11 @@ def dequeue(
     pathlib.Path(tmp_model_dir).mkdir(parents=True, exist_ok=True)
     pathlib.Path(tmp_log_dir).mkdir(parents=True, exist_ok=True)
 
-    # download available style models to tmp dir
+    # download available style model to tmp dir
     start = time.time()
     download_models(block_blob_service, model_dir, storage_container, tmp_model_dir)
     end = time.time()
-    logger.debug("It took {} seconds to download style models.".format(end - start))
+    logger.debug("It took {:.2f} seconds to download style model.".format(end - start))
 
     # start listening...
     logger.debug("Start listening to queue '{}' on service bus...".format(queue))
@@ -111,7 +112,6 @@ def dequeue(
         # get style, input_frame, input_dir & output_dir from msg body
         msg_body = ast.literal_eval(msg.body.decode("utf-8"))
 
-        style = msg_body["style"]
         input_frame = msg_body["input_frame"]
         storage_input_dir = msg_body["input_dir"]
         storage_output_dir = msg_body["output_dir"]
@@ -124,7 +124,7 @@ def dequeue(
 
         # set input/output file vars
         tmp_input_path = os.path.join(tmp_input_dir, input_frame)
-        tmp_model_path = os.path.join(tmp_model_dir, style)
+        tmp_model_path = os.path.join(tmp_model_dir, "model")
         tmp_output_path = os.path.join(tmp_output_dir, input_frame)
         tmp_log_path = os.path.join(tmp_log_dir, log_file)
 
@@ -142,8 +142,7 @@ def dequeue(
         style_transfer.stylize(
             content_scale=None,
             model_dir=tmp_model_dir,
-            cuda=1,
-            style=style,
+            cuda=1 if torch.cuda.is_available() else 0,
             content_dir=tmp_input_dir,
             output_dir=tmp_output_dir,
         )

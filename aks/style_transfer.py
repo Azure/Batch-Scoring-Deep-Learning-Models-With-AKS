@@ -130,7 +130,7 @@ class UpsampleConvLayer(torch.nn.Module):
         return out
 
 
-def stylize(content_scale, model_dir, cuda, style, content_dir, output_dir):
+def stylize(content_scale, model_dir, cuda, content_dir, output_dir):
 
     logger = logging.getLogger("root")
 
@@ -142,7 +142,7 @@ def stylize(content_scale, model_dir, cuda, style, content_dir, output_dir):
     device = torch.device("cuda" if cuda else "cpu")
     with torch.no_grad():
         style_model = TransformerNet()
-        state_dict = torch.load(os.path.join(model_dir, style + ".pth"))
+        state_dict = torch.load(os.path.join(model_dir, "model.pth"))
         # remove saved deprecated running_* keys in InstanceNorm from the checkpoint
         for k in list(state_dict.keys()):
             if re.search(r"in\d+\.running_(mean|var)$", k):
@@ -181,7 +181,7 @@ if __name__ == "__main__":
         "--model-dir",
         type=str,
         required=True,
-        help="saved model to be used for stylizing the image.",
+        help="saved model dir the contains model.pth",
     )
     parser.add_argument(
         "--cuda",
@@ -189,7 +189,6 @@ if __name__ == "__main__":
         required=True,
         help="set it to 1 for running on GPU, 0 for CPU",
     )
-    parser.add_argument("--style", type=str, help="style name")
     parser.add_argument(
         "--content-dir", type=str, required=True, help="directory holding the images"
     )
@@ -218,7 +217,6 @@ if __name__ == "__main__":
         content_scale=args.content_scale,
         model_dir=args.model_dir,
         cuda=args.cuda,
-        style=args.style,
         content_dir=args.content_dir,
         output_dir=args.output_dir,
     )

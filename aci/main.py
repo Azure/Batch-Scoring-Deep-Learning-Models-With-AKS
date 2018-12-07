@@ -26,7 +26,6 @@ if __name__ == "__main__":
     args = parser.return_args()
 
     assert args.video is not None
-    assert args.style is not None
     assert args.storage_container is not None
     assert args.storage_account_name is not None
     assert args.storage_account_key is not None
@@ -34,6 +33,8 @@ if __name__ == "__main__":
     assert args.queue is not None
     assert args.sb_key_name is not None
     assert args.sb_key_value is not None
+
+    terminate = os.getenv("TERMINATE")
 
     video_name = args.video.split(".")[0]
     tmp_dir = ".aci_main"
@@ -68,7 +69,7 @@ if __name__ == "__main__":
         storage_container=args.storage_container,
     )
     t1 = time.time()
-    logger.debug("Preprocessing video finished. Time taken: {}".format(t1 - t0))
+    logger.debug("Preprocessing video finished. Time taken: {:.2f}".format(t1 - t0))
 
     # service bus client
     bus_service = ServiceBusService(
@@ -86,14 +87,17 @@ if __name__ == "__main__":
     add_images_to_queue(
         input_dir=input_dir,
         output_dir=output_dir,
-        style=args.style,
         storage_container=args.storage_container,
         queue=args.queue,
         block_blob_service=block_blob_service,
         bus_service=bus_service,
     )
     t2 = time.time()
-    logger.debug("Adding image to queue finished. Time taken: {}".format(t2 - t1))
+    logger.debug("Adding image to queue finished. Time taken: {:.2f}".format(t2 - t1))
+
+    # terminate if testing
+    if terminate:
+        exit(0)
 
     # poll storage for output
     logger.debug(
@@ -116,7 +120,7 @@ if __name__ == "__main__":
         if output_frames_length == input_frames_length:
             t3 = time.time()
             logger.debug(
-                "Polling succeeded, images have finished processing. Time taken: {}".format(
+                "Polling succeeded, images have finished processing. Time taken: {:.2f}".format(
                     t3 - t2
                 )
             )
@@ -135,7 +139,9 @@ if __name__ == "__main__":
                 video_file=output_video,
             )
             t4 = time.time()
-            logger.debug("Postprocessing vdeo finished. Time taken: {}".format(t4 - t3))
+            logger.debug(
+                "Postprocessing vdeo finished. Time taken: {:.2f}".format(t4 - t3)
+            )
             break
 
         else:
@@ -145,7 +151,7 @@ if __name__ == "__main__":
 
     # upload log file to blob
     t5 = time.time()
-    logger.debug("Process ending. Total time taken: {}".format(t5 - t0))
+    logger.debug("Process ending. Total time taken: {:.2f}".format(t5 - t0))
     block_blob_service.create_blob_from_path(
         args.storage_container,
         "{}.log".format(video_name),

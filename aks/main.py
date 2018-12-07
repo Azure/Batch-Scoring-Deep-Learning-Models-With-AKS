@@ -113,5 +113,5 @@ if __name__ == "__main__":
         model_dir=args.model_dir,
         storage_container=args.storage_container,
         queue=args.queue,
-        terminate=args.terminate,
+        terminate=args.terminate or os.getenv("TERMINATE"),
     )
