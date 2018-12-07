@@ -57,11 +57,14 @@ Run throught the following notebooks:
 3. [Apply Style Transfer Locally](./02_style_transfer_locally.ipynb)
 4. [Apply Style Transfer on AKS](./03_style_transfer_on_aks.ipynb)
 5. [Deploy Logic Apps](./04_deploy_logic_app.ipynb)
+6. [Clean up](./05_clean_up.ipynb)
 
 ## Clean up
 To clean up your working directory, you can run the `clean_up.sh` script that comes with this repo. This will remove all temporary directories that were generated as well as any configuration (such as Dockerfiles) that were created during the tutorials. This script will _not_ remove the `.env` file. 
 
-To clean up your Azure resources, you can simply delete the resource group that all your resources were deployed into. This can be done in the `az cli` using the command `az group delete --name <name-of-your-resource-group>`, or in the portal. If you want to keep certain resources, you can also use the `az cli` or the Azure portal to cherry pick the ones you want to deprovision.
+To clean up your Azure resources, you can simply delete the resource group that all your resources were deployed into. This can be done in the `az cli` using the command `az group delete --name <name-of-your-resource-group>`, or in the portal. If you want to keep certain resources, you can also use the `az cli` or the Azure portal to cherry pick the ones you want to deprovision. Finally, you should also delete the service principle using the `az ad sp delete` command. 
+
+All the step above are covered in the final [notebook](./05_clean_up.ipynb).
 
 # Contributing
 
