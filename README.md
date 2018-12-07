@@ -26,7 +26,7 @@ The above architecture works as follows:
 
 Local/Working Machine:
 - Ubuntu >=16.04LTS (not tested on Mac or Windows)
-- [NVIDIA Drivers on GPU enabled machine](https://linuxconfig.org/how-to-install-the-nvidia-drivers-on-ubuntu-18-04-bionic-beaver-linux) [Additional ref: [https://github.com/NVIDIA/nvidia-docker](https://github.com/NVIDIA/nvidia-docker)]
+- (Optional) [NVIDIA Drivers on GPU enabled machine](https://linuxconfig.org/how-to-install-the-nvidia-drivers-on-ubuntu-18-04-bionic-beaver-linux) [Additional ref: [https://github.com/NVIDIA/nvidia-docker](https://github.com/NVIDIA/nvidia-docker)]
 - [Conda >=4.5.4](https://conda.io/docs/)
 - [Docker >=1.0](https://docs.docker.com/install/linux/docker-ce/ubuntu/#install-docker-ce-1) 
 - [AzCopy >=7.0.0](https://docs.microsoft.com/en-us/azure/storage/common/storage-use-azcopy-linux?toc=%2fazure%2fstorage%2ffiles%2ftoc.json)
@@ -34,7 +34,8 @@ Local/Working Machine:
 
 Accounts:
 - [Dockerhub account](https://hub.docker.com/)
-- [Azure Subscription](https://azure.microsoft.com/en-us/free/) (with a [quota](https://docs.microsoft.com/en-us/azure/azure-supportability/resource-manager-core-quotas-request) for GPU-enabled VMs)
+- [Azure Subscription](https://azure.microsoft.com/en-us/free/) 
+- (Optional) A [quota](https://docs.microsoft.com/en-us/azure/azure-supportability/resource-manager-core-quotas-request) for GPU-enabled VMs
 
 While it is not required, it is also useful to use the [Azure Storage Explorer](https://azure.microsoft.com/en-us/features/storage-explorer/) to inspect your storage account.e `az cli` installed and logged into
 
