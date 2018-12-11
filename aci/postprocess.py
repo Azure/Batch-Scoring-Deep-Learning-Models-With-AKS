@@ -4,28 +4,27 @@ import glob
 import subprocess
 import os
 import pathlib
-from util import Parser
+from util import Parser, Storage
 
 
-def postprocess(mount_dir, frames_dir, audio_file, video_file):
+def postprocess(mount_dir, video_name):
     """
     This function uses ffmpeg on a set of individual frames and 
     an audio file to reconstruct the video. Once the video is 
     reconstructed, it is uploaded to storage.
 
     :param mount_dir: the mount directory of the storage container
-    :param frames_dir: the input directory in Azure storage to download the processed frames from
-    :param audio_file: the input audio file in Azure storage to reconstruct the video with (include ext)
-    :param video_file: the output video file to store to blob (include ext)
+    :param video_name: the name of the video file
     """
     # set video file without audio name
-    video_file_without_audio = "{}_without_audio.mp4".format(video_file.split(".")[0])
+    video_without_audio = "{}_without_audio.mp4".format(video_name)
+    video_with_audio = "{}_processed.mp4".format(video_name)
 
     # stitch frames to generate new video with ffmpeg
     subprocess.run(
         "ffmpeg -framerate 30 -i {}/%06d_frame.jpg -c:v libx264 -profile:v high -crf 20 -pix_fmt yuv420p -y {}".format(
-            os.path.join(mount_dir, frames_dir),
-            os.path.join(mount_dir, video_file_without_audio),
+            os.path.join(mount_dir, video_name, Storage.OUTPUT_DIR.value),
+            os.path.join(mount_dir, video_name, video_without_audio),
         ),
         shell=True,
         check=True,
@@ -34,13 +33,16 @@ def postprocess(mount_dir, frames_dir, audio_file, video_file):
     # reattach audio to the newly generated video
     subprocess.run(
         "ffmpeg -i {} -i {} -map 0:0 -map 1:0 -vcodec copy -acodec copy -y {}".format(
-            os.path.join(mount_dir, video_file_without_audio),
-            os.path.join(mount_dir, audio_file),
-            os.path.join(mount_dir, video_file),
+            os.path.join(mount_dir, video_name, video_without_audio),
+            os.path.join(mount_dir, video_name, "audio.aac"),
+            os.path.join(mount_dir, video_name, video_with_audio),
         ),
         shell=True,
         check=True,
     )
+
+    # remove temp video without audio
+    os.remove(os.path.join(mount_dir, video_name, video_without_audio))
 
 
 if __name__ == "__main__":
@@ -48,14 +50,10 @@ if __name__ == "__main__":
     parser.append_postprocess_args()
     args = parser.return_args()
 
-    assert args.frames_dir is not None
-    assert args.audio is not None
-    assert args.video is not None
+    assert args.video_name is not None
     assert args.storage_mount_dir is not None
 
     postprocess(
         mount_dir=args.storage_mount_dir,
-        frames_dir=args.frames_dir,
-        audio_file=args.audio,
-        video_file=args.video
+        video_name=args.video_name
     )

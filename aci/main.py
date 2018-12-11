@@ -37,6 +37,9 @@ def _process(video):
 
     # set video name
     video_name = video.split(".")[0]
+    input_dir = os.path.join(mount_dir, video_name, "input_frames")
+    output_dir = os.path.join(mount_dir, video_name, "output_frames")
+    audio_file = os.path.join(mount_dir, video_name, "audio.aac")
 
     # setup logger
     handler_format = get_handler_format()
@@ -44,7 +47,7 @@ def _process(video):
     console_handler.setFormatter(handler_format)
     log_file = "{}.log".format(video_name)
     file_handler = RotatingFileHandler(
-        os.path.join(mount_dir, log_file), maxBytes=20000
+        os.path.join(mount_dir, video_name, log_file), maxBytes=20000
     )
     file_handler.setFormatter(handler_format)
     logger = logging.getLogger("root")
@@ -65,15 +68,12 @@ def _process(video):
         shared_access_key_value=sb_key_value,
     )
 
-    # set output_dir
-    input_dir = frames_dir
-    output_dir = "{}_processed".format(frames_dir)
-
     # add all images from frame_dir to the queue
-    logger.debug("Adding images from {} to queue {}".format(input_dir, queue))
+    logger.debug("Adding images from {} to queue {}".format(input_dir ,queue))
     image_count = add_images_to_queue(
         mount_dir=mount_dir,
         queue=queue,
+        video_name=video_name,
         bus_service=bus_service,
     )
     t2 = time.time()
@@ -82,39 +82,25 @@ def _process(video):
     if terminate:
         exit(0)
 
-    # set input frames length
-    input_frames_length = image_count
-
-    # name output_video
-    output_video = "{}_processed.mp4".format(video.split(".")[0])
-
-    # make output dir if not exists
-    if not os.path.exists(os.path.join(mount_dir, output_dir)):
-        os.mkdir(os.path.join(mount_dir, output_dir))
-
     # poll storage for output
     logger.debug(
-        "Polling for input images {} to equal output images {}".format(
-            os.path.join(mount_dir, input_dir), os.path.join(mount_dir, output_dir)
-        )
+        "Polling for input images {} to equal output images {}".format(input_dir, output_dir)
     )
 
     while True:
-        path, dirs, files = next(os.walk(os.path.join(mount_dir, output_dir)))
+        path, dirs, files = next(os.walk(output_dir))
         output_frames_length = len(files)
 
-        if output_frames_length == input_frames_length:
+        if output_frames_length == image_count:
             t3 = time.time()
 
             # postprocess video
             logger.debug(
                 "Stitching video together with processed frames dir '{}' and audio file '{}'.".format(
-                    os.path.join(mount_dir, output_dir), os.path.join(mount_dir, audio)
+                    output_dir, audio_file 
                 )
             )
-            postprocess(
-                frames_dir=output_dir, audio_file=audio, video_file=output_video, mount_dir=mount_dir
-            )
+            postprocess(video_name=video_name, mount_dir=mount_dir)
 
             t4 = time.time()
             break

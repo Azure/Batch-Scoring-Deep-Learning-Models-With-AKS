@@ -6,7 +6,7 @@ import sys
 import subprocess
 import os
 import logging
-from util import Parser
+from util import Parser, Storage 
 
 
 def add_images_to_queue(
@@ -22,8 +22,12 @@ def add_images_to_queue(
     returns total images added to queue
     """
     # set input/output dirs
-    input_dir = os.path.join(mount_dir, input_dir_name)
-    output_dir = os.path.join(mount_dir, output_dir_name)
+    input_dir = os.path.join(mount_dir, video_name, Storage.INPUT_DIR.value)
+    output_dir = os.path.join(mount_dir, video_name, Storage.OUTPUT_DIR.value)
+
+    # create output_dir
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
 
     # count number of frames in input dir
     path, dirs, files = next(os.walk(input_dir))
@@ -42,8 +46,7 @@ def add_images_to_queue(
 
         msg_body = {
             "input_frame": filename,
-            "input_dir": input_dir_name,
-            "output_dir": output_dir_name,
+            "video_name": video_name
         }
         msg = Message(str(msg_body).encode())
         msg_batch.append(msg)
@@ -67,13 +70,12 @@ if __name__ == "__main__":
     parser.append_add_images_to_queue_args()
     args = parser.return_args()
 
-    assert args.input_dir is not None
-    assert args.output_dir is not None
     assert args.namespace is not None
     assert args.queue is not None
     assert args.sb_key_name is not None
     assert args.sb_key_value is not None
     assert args.storage_mount_dir is not None
+    assert args.video_name is not None
 
     # setup logger
     handler_format = get_handler_format()
@@ -92,9 +94,8 @@ if __name__ == "__main__":
 
     add_images_to_queue(
         mount_dir=args.storage_mount_dir,
-        input_dir_name=args.input_dir,
-        output_dir_name=args.output_dir,
         queue=args.queue,
+        video_name=args.video_name,
         bus_service=bus_service,
         queue_limit=args.queue_limit,
     )

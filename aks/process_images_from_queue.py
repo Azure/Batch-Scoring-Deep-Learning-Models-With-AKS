@@ -56,21 +56,22 @@ def dequeue(bus_service, model_dir, queue, mount_dir, terminate=None):
         msg_body = ast.literal_eval(msg.body.decode("utf-8"))
 
         input_frame = msg_body["input_frame"]
-        input_dir = msg_body["input_dir"]
-        output_dir = msg_body["output_dir"]
-        log_dir = "{}_logs".format(output_dir)
+        video_name = msg_body["video_name"]
+        input_dir = os.path.join(mount_dir, video_name, util.Storage.INPUT_DIR.value)
+        output_dir = os.path.join(mount_dir, video_name, util.Storage.OUTPUT_DIR.value)
+        log_dir = os.path.join(mount_dir, video_name, "logs")
 
         # make output dir if not exists
-        if not os.path.exists(os.path.join(mount_dir, output_dir)):
-            os.makedirs(os.path.join(mount_dir, output_dir))
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
 
         # make log dir if not exists
-        if not os.path.exists(os.path.join(mount_dir, log_dir)):
-            os.makedirs(os.path.join(mount_dir, log_dir))
+        if not os.path.exists(log_dir):
+            os.makedirs(log_dir)
 
         # create a new file handler for style transfer logs
         log_file = "{}.log".format(input_frame.split(".")[0])
-        add_file_handler(logger, os.path.join(mount_dir, log_dir, log_file))
+        add_file_handler(logger, os.path.join(log_dir, log_file))
         logger.debug("Queue message body: {}".format(msg_body))
 
         # run style transfer
@@ -79,9 +80,9 @@ def dequeue(bus_service, model_dir, queue, mount_dir, terminate=None):
             content_scale=None,
             model_dir=os.path.join(mount_dir, model_dir),
             cuda=1 if torch.cuda.is_available() else 0,
-            content_dir=os.path.join(mount_dir, input_dir),
+            content_dir=input_dir,
             content_filename=input_frame,
-            output_dir=os.path.join(mount_dir, output_dir),
+            output_dir=output_dir,
         )
         logger.debug("Finished style transfer on {}/{}".format(input_dir, input_frame))
 
