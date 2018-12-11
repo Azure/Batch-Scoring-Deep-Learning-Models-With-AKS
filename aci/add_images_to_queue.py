@@ -10,22 +10,20 @@ from util import Parser
 
 
 def add_images_to_queue(
-    input_dir_name, output_dir_name, queue, bus_service, queue_limit=None
+    mount_dir, queue, video_name, bus_service, queue_limit=None
 ):
     """
-    :param input_dir: the input directory where the frames are stored
-    :param output_dir: the output directory where we want to store the processed frames
-    :param storage_container: the storage container of the above three params
+    :param mount_dir: mount directory for storage container
     :param queue: the queue to add messages to
-    :param queue_limit: (optional) an optional queue limit to stop queuing at
-    :param block_blob_service: blob client
+    :param video_name: the name of the video file (excluding ext)
     :param bus_service: service bus client
-    """
-    t0 = time.time()
+    :param queue_limit: (optional) an optional queue limit to stop queuing at
 
+    returns total images added to queue
+    """
     # set input/output dirs
-    input_dir = os.path.join("data", input_dir_name)
-    output_dir = os.path.join("data", output_dir_name)
+    input_dir = os.path.join(mount_dir, input_dir_name)
+    output_dir = os.path.join(mount_dir, output_dir_name)
 
     # count number of frames in input dir
     path, dirs, files = next(os.walk(input_dir))
@@ -60,8 +58,7 @@ def add_images_to_queue(
                 bus_service.send_queue_message_batch(queue, msg_batch)
                 msg_batch = []
 
-    t1 = time.time()
-    logger.debug("Adding image to queue finished. Time taken: {:.2f}".format(t1 - t0))
+    return file_count
 
 
 if __name__ == "__main__":
@@ -76,6 +73,7 @@ if __name__ == "__main__":
     assert args.queue is not None
     assert args.sb_key_name is not None
     assert args.sb_key_value is not None
+    assert args.storage_mount_dir is not None
 
     # setup logger
     handler_format = get_handler_format()
@@ -93,6 +91,7 @@ if __name__ == "__main__":
     )
 
     add_images_to_queue(
+        mount_dir=args.storage_mount_dir,
         input_dir_name=args.input_dir,
         output_dir_name=args.output_dir,
         queue=args.queue,

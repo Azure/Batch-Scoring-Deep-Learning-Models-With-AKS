@@ -81,25 +81,12 @@ class Parser:
         self.__append_storage_args()
 
     def __append_storage_args(self):
-        pass
-        # self.parser.add_argument(
-        #     "--storage-container",
-        #     dest="storage_container",
-        #     help="The name storage container.",
-        #     default=os.getenv("STORAGE_CONTAINER_NAME"),
-        # )
-        # self.parser.add_argument(
-        #     "--storage-account-name",
-        #     dest="storage_account_name",
-        #     help="The storage account name.",
-        #     default=os.getenv("STORAGE_ACCOUNT_NAME"),
-        # )
-        # self.parser.add_argument(
-        #     "--storage-account-key",
-        #     dest="storage_account_key",
-        #     help="The name storage key.",
-        #     default=os.getenv("STORAGE_ACCOUNT_KEY"),
-        # )
+        self.parser.add_argument(
+            "--storage-mount-dir",
+            dest="storage_mount_dir",
+            help="The mount directory connected to the azure blob storage container",
+            default=os.getenv("MOUNT_DIR", "/data"),
+        )
 
     def __append_service_bus_args(self):
         self.parser.add_argument(

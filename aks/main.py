@@ -50,6 +50,12 @@ if __name__ == "__main__":
         default=os.getenv("SB_SHARED_ACCESS_KEY_VALUE"),
     )
     parser.add_argument(
+        "--storage-mount-dir",
+        dest="storage_mount_dir",
+        help="The value of the storage mount directory",
+        default=os.getenv("MOUNT_DIR", "data")
+    )
+    parser.add_argument(
         "--terminate",
         dest="terminate",
         action="store_true",
@@ -63,6 +69,7 @@ if __name__ == "__main__":
     assert args.queue is not None
     assert args.sb_key_name is not None
     assert args.sb_key_value is not None
+    assert args.storage_mount_dir is not None
 
     # setup logger
     handler_format = util.get_handler_format()
@@ -85,5 +92,6 @@ if __name__ == "__main__":
         bus_service=bus_service,
         model_dir=args.model_dir,
         queue=args.queue,
+        mount_dir=args.storage_mount_dir,
         terminate=args.terminate or os.getenv("TERMINATE"),
     )
