@@ -1,4 +1,5 @@
 from azure.storage.blob import BlockBlobService
+import time
 import glob
 import subprocess
 import os
@@ -6,69 +7,50 @@ import pathlib
 from util import Parser
 
 
-def postprocess(
-    block_blob_service, storage_container, frames_dir, audio_file, video_file
-):
+def postprocess(frames_dir, audio_file, video_file):
     """
     This function uses ffmpeg on a set of individual frames and 
     an audio file to reconstruct the video. Once the video is 
     reconstructed, it is uploaded to storage.
 
-    :param block_blob_service: blob client
     :param frames_dir: the input directory in Azure storage to download the processed frames from
     :param audio_file: the input audio file in Azure storage to reconstruct the video with (include ext)
     :param video_file: the output video file to store to blob (include ext)
     """
-
-    tmp_dir = ".aci_post"
-    pathlib.Path(os.path.join(tmp_dir, frames_dir)).mkdir(parents=True, exist_ok=True)
-
-    # download audio from storage to temp dir
-    block_blob_service.get_blob_to_path(
-        storage_container, audio_file, os.path.join(tmp_dir, audio_file)
-    )
-
-    # download images from blob to temp dir
-    frames = block_blob_service.list_blobs(
-        storage_container, prefix="{}/".format(frames_dir)
-    )
-
-    for frame in frames:
-        frame_name = frame.name.split("/")[-1]
-        block_blob_service.get_blob_to_path(
-            storage_container,
-            os.path.join(frames_dir, frame_name),
-            os.path.join(tmp_dir, frames_dir, frame_name),
-        )
+    t0 = time.time()
 
     # set video file without audio name
     video_file_without_audio = "{}_without_audio.mp4".format(video_file.split(".")[0])
 
     # stitch frames to generate new video with ffmpeg
+    t1 = time.time()
     subprocess.run(
         "ffmpeg -framerate 30 -i {}/%06d_frame.jpg -c:v libx264 -profile:v high -crf 20 -pix_fmt yuv420p -y {}".format(
-            os.path.join(tmp_dir, frames_dir),
-            os.path.join(tmp_dir, video_file_without_audio),
+            os.path.join("data", frames_dir),
+            os.path.join("data", video_file_without_audio),
         ),
         shell=True,
         check=True,
     )
 
     # reattach audio to the newly generated video
+    t2 = time.time()
     subprocess.run(
         "ffmpeg -i {} -i {} -map 0:0 -map 1:0 -vcodec copy -acodec copy -y {}".format(
-            os.path.join(tmp_dir, video_file_without_audio),
-            os.path.join(tmp_dir, audio_file),
-            os.path.join(tmp_dir, video_file),
+            os.path.join("data", video_file_without_audio),
+            os.path.join("data", audio_file),
+            os.path.join("data", video_file),
         ),
         shell=True,
         check=True,
     )
 
-    # upload video to blob
-    block_blob_service.create_blob_from_path(
-        storage_container, video_file, os.path.join(tmp_dir, video_file)
-    )
+    # time
+    t3 = time.time()
+    print("Download images from blob. Time taken: {:.2f}".format(t1 - t0))
+    print("Stitch images together.    Time taken: {:.2f}".format(t2 - t1))
+    print("Reattach audio file.       Time taken: {:.2f}".format(t3 - t2))
+    print("Total.                     Time taken: {:.2f}".format(t3 - t0))
 
     return
 
@@ -81,18 +63,7 @@ if __name__ == "__main__":
     assert args.frames_dir is not None
     assert args.audio is not None
     assert args.video is not None
-    assert args.storage_container is not None
-    assert args.storage_account_name is not None
-    assert args.storage_account_key is not None
-
-    block_blob_service = BlockBlobService(
-        account_name=args.storage_account_name, account_key=args.storage_account_key
-    )
 
     postprocess(
-        block_blob_service=block_blob_service,
-        storage_container=args.storage_container,
-        frames_dir=args.frames_dir,
-        audio_file=args.audio,
-        video_file=args.video,
+        frames_dir=args.frames_dir, audio_file=args.audio, video_file=args.video
     )

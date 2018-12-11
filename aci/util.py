@@ -69,7 +69,7 @@ class Parser:
         self.parser.add_argument(
             "--video",
             dest="video",
-            help="The name of the video in a storage container (including ext).",
+            help="The name (not path) of the video in a storage container (including ext).",
             default=os.getenv("VIDEO"),
         )
         self.parser.add_argument(
@@ -81,24 +81,25 @@ class Parser:
         self.__append_storage_args()
 
     def __append_storage_args(self):
-        self.parser.add_argument(
-            "--storage-container",
-            dest="storage_container",
-            help="The name storage container.",
-            default=os.getenv("STORAGE_CONTAINER_NAME"),
-        )
-        self.parser.add_argument(
-            "--storage-account-name",
-            dest="storage_account_name",
-            help="The storage account name.",
-            default=os.getenv("STORAGE_ACCOUNT_NAME"),
-        )
-        self.parser.add_argument(
-            "--storage-account-key",
-            dest="storage_account_key",
-            help="The name storage key.",
-            default=os.getenv("STORAGE_ACCOUNT_KEY"),
-        )
+        pass
+        # self.parser.add_argument(
+        #     "--storage-container",
+        #     dest="storage_container",
+        #     help="The name storage container.",
+        #     default=os.getenv("STORAGE_CONTAINER_NAME"),
+        # )
+        # self.parser.add_argument(
+        #     "--storage-account-name",
+        #     dest="storage_account_name",
+        #     help="The storage account name.",
+        #     default=os.getenv("STORAGE_ACCOUNT_NAME"),
+        # )
+        # self.parser.add_argument(
+        #     "--storage-account-key",
+        #     dest="storage_account_key",
+        #     help="The name storage key.",
+        #     default=os.getenv("STORAGE_ACCOUNT_KEY"),
+        # )
 
     def __append_service_bus_args(self):
         self.parser.add_argument(

@@ -3,6 +3,12 @@
 *.ipynb_checkpoints
 *__pycache__
 
+# fuse connection
+fuse_connection.cfg
+
+# mounted disk
+data/
+
 # dont commit images or videos
 *.jpg
 *.png

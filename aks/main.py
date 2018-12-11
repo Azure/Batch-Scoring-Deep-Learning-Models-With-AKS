@@ -26,24 +26,6 @@ if __name__ == "__main__":
         default=os.getenv("STORAGE_MODEL_DIR"),
     )
     parser.add_argument(
-        "--storage-container",
-        dest="storage_container",
-        help="The name storage container.",
-        default=os.getenv("STORAGE_CONTAINER_NAME"),
-    )
-    parser.add_argument(
-        "--storage-account-name",
-        dest="storage_account_name",
-        help="The storage account name.",
-        default=os.getenv("STORAGE_ACCOUNT_NAME"),
-    )
-    parser.add_argument(
-        "--storage-account-key",
-        dest="storage_account_key",
-        help="The name storage key.",
-        default=os.getenv("STORAGE_ACCOUNT_KEY"),
-    )
-    parser.add_argument(
         "--namespace",
         dest="namespace",
         help="The name queue's namespace.",
@@ -77,9 +59,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     assert args.model_dir is not None
-    assert args.storage_container is not None
-    assert args.storage_account_name is not None
-    assert args.storage_account_key is not None
     assert args.namespace is not None
     assert args.queue is not None
     assert args.sb_key_name is not None
@@ -101,17 +80,10 @@ if __name__ == "__main__":
         shared_access_key_value=args.sb_key_value,
     )
 
-    # blob client
-    block_blob_service = BlockBlobService(
-        account_name=args.storage_account_name, account_key=args.storage_account_key
-    )
-
     # run dequeue
     dequeue(
-        block_blob_service=block_blob_service,
         bus_service=bus_service,
         model_dir=args.model_dir,
-        storage_container=args.storage_container,
         queue=args.queue,
         terminate=args.terminate or os.getenv("TERMINATE"),
     )
