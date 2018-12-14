@@ -41,6 +41,10 @@ def _process(video):
     output_dir = os.path.join(mount_dir, video_name, "output_frames")
     audio_file = os.path.join(mount_dir, video_name, "audio.aac")
 
+    # create parent directory in mount_dir
+    if not os.path.exists(os.path.join(mount_dir, video_name)):
+        os.makedirs(os.path.join(mount_dir, video_name))
+
     # setup logger
     handler_format = get_handler_format()
     console_handler = logging.StreamHandler(sys.stdout)
@@ -118,10 +122,11 @@ def _process(video):
     logger.debug("Postprocessing video finished... Time taken in seconds: {:.2f}".format(t4 - t3))
     logger.debug("Total process................... Time taken in seconds: {:.2f}".format(t5 - t0))
 
-@app.route('/process/<video>', methods=['GET'])
-def process_video(video):
-    threading.Thread(target=_process, args=(video,)).start()
-    return "Processing {} in background...\n".format(video)
+@app.route('/process', methods=['GET'])
+def process_video():
+    video_name = request.args.get('video_name')
+    threading.Thread(target=_process, args=(video_name,)).start()
+    return "Processing {} in background...\n".format(video_name)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080)
