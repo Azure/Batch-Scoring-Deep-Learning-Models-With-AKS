@@ -1,6 +1,7 @@
 # Original source: https://github.com/pytorch/examples/blob/master/fast_neural_style/neural_style/neural_style.py
 import argparse
 import os
+import time
 import sys
 import re
 import logging
@@ -130,7 +131,32 @@ class UpsampleConvLayer(torch.nn.Module):
         return out
 
 
-def stylize(content_scale, model_dir, cuda, content_dir, output_dir):
+def _stylize(content_scale, style_model, device, input_file, output_file, output_dir):
+    """
+    :param content_scale: to scale image
+    :param style_model: the style model
+    :param device: cuda or cpu
+    :param path: full path of image to process
+    :param filename: the name of the file to output
+    :param output_dir: the name of the dir to save processed output files
+    """
+    logger = logging.getLogger("root")
+
+    logger.debug("Processing {}".format(input_file))
+    content_image = load_image(input_file, scale=content_scale)
+    content_transform = transforms.Compose(
+        [transforms.ToTensor(), transforms.Lambda(lambda x: x.mul(255))]
+    )
+    content_image = content_transform(content_image)
+    content_image = content_image.unsqueeze(0).to(device)
+
+    output = style_model(content_image).cpu()
+
+    output_path = os.path.join(output_dir, output_file)
+    save_image(output_path, output[0])
+
+
+def stylize(content_scale, content_filename, model_dir, cuda, content_dir, output_dir):
 
     logger = logging.getLogger("root")
 
@@ -138,34 +164,39 @@ def stylize(content_scale, model_dir, cuda, content_dir, output_dir):
     assert os.path.exists(content_dir)
     assert os.path.exists(output_dir)
     assert os.path.isdir(model_dir)
+    if content_filename:
+        assert os.path.exists(os.path.join(content_dir, content_filename))
 
     device = torch.device("cuda" if cuda else "cpu")
     with torch.no_grad():
         style_model = TransformerNet()
         state_dict = torch.load(os.path.join(model_dir, "model.pth"))
-        # remove saved deprecated running_* keys in InstanceNorm from the checkpoint
         for k in list(state_dict.keys()):
             if re.search(r"in\d+\.running_(mean|var)$", k):
                 del state_dict[k]
         style_model.load_state_dict(state_dict)
         style_model.to(device)
 
-        filenames = os.listdir(content_dir)
-
-        for filename in filenames:
-            full_path = os.path.join(content_dir, filename)
-            logger.debug("Processing {}".format(full_path))
-            content_image = load_image(full_path, scale=content_scale)
-            content_transform = transforms.Compose(
-                [transforms.ToTensor(), transforms.Lambda(lambda x: x.mul(255))]
+        # if applying style transfer to only one image
+        if content_filename:
+            full_path = os.path.join(content_dir, content_filename)
+            _stylize(
+                content_scale,
+                style_model,
+                device,
+                full_path,
+                content_filename,
+                output_dir,
             )
-            content_image = content_transform(content_image)
-            content_image = content_image.unsqueeze(0).to(device)
 
-            output = style_model(content_image).cpu()
-
-            output_path = os.path.join(output_dir, filename)
-            save_image(output_path, output[0])
+        # if applying style transfer to all images in directory
+        else:
+            filenames = os.listdir(content_dir)
+            for filename in filenames:
+                full_path = os.path.join(content_dir, filename)
+                _stylize(
+                    content_scale, style_model, device, full_path, filename, output_dir
+                )
 
 
 if __name__ == "__main__":
@@ -193,6 +224,11 @@ if __name__ == "__main__":
         "--content-dir", type=str, required=True, help="directory holding the images"
     )
     parser.add_argument(
+        "--content-filename",
+        type=str,
+        help="(optional) if specified, only process the individual image",
+    )
+    parser.add_argument(
         "--output-dir",
         type=str,
         required=True,
@@ -218,5 +254,6 @@ if __name__ == "__main__":
         model_dir=args.model_dir,
         cuda=args.cuda,
         content_dir=args.content_dir,
+        content_filename=args.content_filename,
         output_dir=args.output_dir,
     )

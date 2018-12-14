@@ -1,13 +1,17 @@
 import argparse
 import logging
 import os
+from enum import Enum
 
+class Storage(Enum):
+    AUDIO_FILE = "audio.aac"
+    INPUT_DIR = "input_frames"
+    OUTPUT_DIR = "output_frames"
 
 def get_handler_format():
     return logging.Formatter(
         "%(asctime)s [%(name)s:%(filename)s:%(lineno)s] %(levelname)s - %(message)s"
     )
-
 
 class Parser:
     """
@@ -20,33 +24,20 @@ class Parser:
     def return_args(self):
         return self.parser.parse_args()
 
-    def append_main_args(self):
+    def append_preprocess_args(self):
         self.parser.add_argument(
             "--video",
             dest="video",
-            help="The name of the video in a storage container (including ext).",
+            help="The name (not path) of the video in a storage container (including ext).",
             default=os.getenv("VIDEO"),
         )
         self.__append_storage_args()
-        self.__append_service_bus_args()
-
-    def append_postprocess_args(self):
-        self.__append_video_args()
-
-    def append_preprocess_args(self):
-        self.__append_video_args()
 
     def append_add_images_to_queue_args(self):
         self.parser.add_argument(
-            "--input-dir",
-            dest="input_dir",
-            help="The name of the input frames directory in your azure storage container.",
-            default=None,
-        )
-        self.parser.add_argument(
-            "--output-dir",
-            dest="output_dir",
-            help="The name of the output frames directory in your azure storage container.",
+            "--video-name",
+            dest="video_name",
+            help="The name (not path) of the video in a storage container (excluding ext).",
             default=None,
         )
         self.parser.add_argument(
@@ -59,45 +50,21 @@ class Parser:
         self.__append_storage_args()
         self.__append_service_bus_args()
 
-    def __append_video_args(self):
+    def append_postprocess_args(self):
         self.parser.add_argument(
-            "--frames-dir",
-            dest="frames_dir",
-            help="the name of the output frames directory in your azure storage container",
+            "--video-name",
+            dest="video_name",
+            help="The name (not path) of the video in a storage container (excluding ext).",
             default=None,
-        )
-        self.parser.add_argument(
-            "--video",
-            dest="video",
-            help="The name of the video in a storage container (including ext).",
-            default=os.getenv("VIDEO"),
-        )
-        self.parser.add_argument(
-            "--audio",
-            dest="audio",
-            help="the name of the output audio file in your azure storage container",
-            default=os.getenv("AUDIO"),
         )
         self.__append_storage_args()
 
     def __append_storage_args(self):
         self.parser.add_argument(
-            "--storage-container",
-            dest="storage_container",
-            help="The name storage container.",
-            default=os.getenv("STORAGE_CONTAINER_NAME"),
-        )
-        self.parser.add_argument(
-            "--storage-account-name",
-            dest="storage_account_name",
-            help="The storage account name.",
-            default=os.getenv("STORAGE_ACCOUNT_NAME"),
-        )
-        self.parser.add_argument(
-            "--storage-account-key",
-            dest="storage_account_key",
-            help="The name storage key.",
-            default=os.getenv("STORAGE_ACCOUNT_KEY"),
+            "--storage-mount-dir",
+            dest="storage_mount_dir",
+            help="The mount directory connected to the azure blob storage container",
+            default=os.getenv("MOUNT_DIR", "/data"),
         )
 
     def __append_service_bus_args(self):
