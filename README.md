@@ -9,12 +9,11 @@ In this repository, we use the scenario of applying style transfer onto a video 
 
 The above architecture works as follows:
 1. Upload a video file to storage.
-2. The video file will trigger Logic App to spin up an ACI.
-3. The ACI will first preprocess the video file by splitting the video into individual images and extracting the audio file.
-4. The ACI will then add all images to the Service Bus queue.
-5. The AKS cluster is continuously polling the Service Bus queue - as soon as any images are in the queue, it will pull it off the queue and apply style transfer to the image.
-6. The ACI will wait until all images have completed processing by the AKS cluster - when it is done, it will download all processed images and stitch it back together into a video with the audio file.
-7. The ACI will upload the final video back to storage.
+2. The video file will trigger Logic App to send a request to the flask endpoint hosted on one of the nodes of the AKS cluster.
+3. That node will first preprocess the video file by splitting the video into individual images and extracting the audio file.
+4. That node will then add all images to the Service Bus queue.
+5. The other nodes in the AKS cluster are continuously polling the Service Bus queue - as soon as any images are in the queue, it will pull it off the queue and apply style transfer to the image.
+6. When all frames have been processed, the images will be stitched back together into a video with the audio file.
 
 ### What is Neural Style Transfer 
 
@@ -55,10 +54,11 @@ Run `az aks browse -n $aks_cluster -g $resource_group` in your terminal so that 
 Run throught the following notebooks:
 1. [Test the Style Transfer Script](/00_test_neural_style_transfer.ipynb)
 2. [Setup Azure - Resource group, Storage, Service Bus](/01_setup_azure.ipynb).
-3. [Apply Style Transfer Locally](./02_style_transfer_locally.ipynb)
-4. [Apply Style Transfer on AKS](./03_style_transfer_on_aks.ipynb)
-5. [Deploy Logic Apps](./04_deploy_logic_app.ipynb)
-6. [Clean up](./05_clean_up.ipynb)
+3. [Test the model locally](./02_local_testing.ipynb)
+4. [Create the AKS cluster](./03_create_aks_cluster.ipynb)
+5. [Run style transfer on the cluster](./04_style_transfer_on_aks.ipynb)
+6. [Deploy Logic Apps](./05_deploy_logic_app.ipynb)
+7. [Clean up](./06_clean_up.ipynb)
 
 ## Clean up
 To clean up your working directory, you can run the `clean_up.sh` script that comes with this repo. This will remove all temporary directories that were generated as well as any configuration (such as Dockerfiles) that were created during the tutorials. This script will _not_ remove the `.env` file. 

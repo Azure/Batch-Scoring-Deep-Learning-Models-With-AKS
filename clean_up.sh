@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # rm tmp dirs
 rm -rf output_dir
 rm -rf content_dir
@@ -21,7 +23,6 @@ rm scoring_app_deployment.json
 rm flask_app/Dockerfile
 rm flask_app/requirements.txt
 rm flask_app_deployment.json
-rm logic_app.json
 
 # reset kubectl config 
 rm ~/.kube/config
