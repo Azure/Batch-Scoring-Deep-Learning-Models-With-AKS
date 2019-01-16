@@ -47,6 +47,9 @@ While it is not required, it is also useful to use the [Azure Storage Explorer](
 5. Log in to Azure using the __az cli__ `az login`
 6. Log in to Docker using the docker cli `docker login`
 
+### DLVM Setup
+If you are running on a Deep Learning Virtual Machine (DLVM), run `conda install prompt_toolkit=1.0.15` after running the setup instructions above. This will downgrade the version of `prompt_toolkit` so that it is [compatible with jupyter notebooks](https://github.com/jupyter/jupyter_console/issues/158).
+
 ## Steps
 Run throught the following notebooks:
 1. [Test the Style Transfer Script](/00_test_neural_style_transfer.ipynb)
