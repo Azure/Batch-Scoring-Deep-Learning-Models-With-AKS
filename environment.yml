@@ -1,4 +1,4 @@
-name: batchscoringdl
+name: batchscoringdl_aks
 channels:
   - conda-forge
   - defaults
@@ -9,10 +9,11 @@ dependencies:
   - nbconvert=5.3.1
   - pip=10.0.1
   - python=3.6.7
+  - prompt_toolkit=1.0.15
   - pip:
     - azure==4.0.0
     - azure.mgmt.common==0.20.0
-    - azure-cli==2.0.45
+    - azure-cli==2.0.55
     - black==18.9b0
     - python-dotenv==0.9.1
     - torch==0.4.1
