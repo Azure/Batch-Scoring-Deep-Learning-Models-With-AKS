@@ -1,4 +1,4 @@
-name: batchscoringdl_aks
+name: batchscoringdl
 channels:
   - conda-forge
   - defaults
