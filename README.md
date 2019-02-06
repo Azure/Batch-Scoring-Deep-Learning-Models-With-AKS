@@ -2,7 +2,7 @@
 # Batch Scoring Deep Learning Models With Kubernetes
 
 ## Overview
-In this repository, we use the scenario of applying style transfer onto a video (collection of images). This architecture can be generalized for any batch scoring with deep learning scenario.
+In this repository, we use the scenario of applying style transfer onto a video (collection of images). This architecture can be generalized for any batch scoring with deep learning scenario. For an alternative solution using Azure Machine Learning service, we suggest seeing the solution available [here](https://github.com/Azure/Batch-Scoring-Deep-Learning-Models-With-AML) which is also described on the [Azure Reference Architecture center](https://docs.microsoft.com/en-us/azure/architecture/reference-architectures/ai/batch-scoring-deep-learning).
 
 ## Design
 ![Reference Architecture Diagram](https://happypathspublic.blob.core.windows.net/assets/batch_scoring_for_dl/batchscoringdl-aks-architecture-diagram.PNG)
